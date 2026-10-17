@@ -5,15 +5,18 @@
 **撤回 · 编辑重发 · 重新生成**，加上**写安全**的会话版本化 —— DeepSeek Harness 的
 **Agent 业务层（生产级保证）** 实现。
 
-[![npm version](https://img.shields.io/npm/v/dsh-retrace)](https://www.npmjs.com/package/dsh-retrace)
-[![npm downloads](https://img.shields.io/npm/dm/dsh-retrace)](https://www.npmjs.com/package/dsh-retrace)
-[![License: MIT](https://img.shields.io/npm/l/dsh-retrace)](https://github.com/yamingmou/dsh-retrace/blob/main/LICENSE)
+[![Version](https://img.shields.io/badge/version-0.4.54-blue)](https://github.com/daha1216/dsh-retrace/commits/main)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/daha1216/dsh-retrace/blob/main/LICENSE)
 [![DSH plugin](https://img.shields.io/badge/DSH-plugin-4A90D9)](https://github.com/topics/dsh-plugin)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](https://github.com/yamingmou/dsh-retrace/pulls)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](https://github.com/daha1216/dsh-retrace/pulls)
 
 **简体中文** · [English](./README.md)
 
 </div>
+
+> 本仓库是 [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace) 的个人兼容修复
+> Fork（维护者 daha1216），当前版本 **0.4.54**。0.4.50–0.4.54 的数据安全与体验修复见下方
+> 「更新记录」；安装请从本 Fork 的 GitHub 直装（详见安装章节）。
 
 **撤回 / 编辑重发 / 重新生成** —— 每个会话都该有的三个操作。但回退不只是「撤掉一条
 消息」：DeepSeek Harness 把对话存在 append-only 事件日志里，撤回只回退上下文，改过的
@@ -29,32 +32,27 @@
 > 需要带 `dsh` CLI 的 DeepSeek Harness；装完**重启 DSH** 生效（运行中的应用不会热加载）。
 
 ```sh
-dsh plugin --profile desktop add dsh-retrace    # DSH 桌面版
-# 或 Web 部署：dsh plugin --profile web add dsh-retrace
-# 或从 GitHub 直装：dsh plugin --profile desktop add github:yamingmou/dsh-retrace
+# 推荐：从本 Fork 的 GitHub 直装（含 0.4.50–0.4.54 修复）
+dsh plugin --profile desktop add github:daha1216/dsh-retrace   # DSH 桌面版
+# 或 Web 部署：dsh plugin --profile web add github:daha1216/dsh-retrace
 # 或从 ZIP 解压后：dsh plugin --profile desktop add ~/plugins/dsh-retrace
 ```
 
-**没有命令行？** 先装一次社区插件市场，再在 **设置 → Plugin Market** 搜
-**dsh-retrace** 一键安装：
-
-```sh
-dsh plugin --profile desktop add dshmarket    # 只需一次
-```
+> 本 Fork 未以独立包名发布到 npm —— `add dsh-retrace` 会装到上游版本，**不含**这里的修复。
+> 若环境变量中没有全局 `dsh`，命令前加 `npx --yes -p @deepseek-ai/dsh`。
 
 重启后，悬停任意助手回复 → **↩ / ↻**；任意用户消息 → **✎**。详细步骤见
 [📦 安装](#-安装)。
 
 ---
----
 
-## 🛡️ 生产级保证（0.4.x 全部已上线）
+## 🛡️ 生产级保证（0.4.54 全部已上线）
 
 | | 能力 | 说明 |
 |---|---|---|
 | 🛡️ | **写安全** | 每次回退过三层写前契约校验；运行中的 agent 自动停止（官方 `cancel`/`whenIdle`）；轮次间 marker 用临时 step 包裹 —— **回退永不弄脏日志，/compact 永不失效** |
 | 🔍 | **深层体检** | 配套 `dsh-log-contract` 30+ 条契约规则（token-meter 配对 / 跨 step 引用 / 物理序 / inbox 重放），用真实损坏会话当测试集 —— 能找出让 /compact 永久失效的那类问题 |
-| 🔄 | **检测→修复→守护** | 看门狗在并发写入第一时间快照日志；离线 `fix` 原地中和问题 marker、裁剪跨 step 引用；写前校验在坏事件落盘前拦住 |
+| 🔄 | **检测→修复→守护** | 看门狗（**默认关闭**，设 `DSH_RETRACE_WATCHDOG=1` 开启）在并发写入第一时间快照日志；离线 `fix` 原地中和问题 marker、裁剪跨 step 引用；写前校验在坏事件落盘前拦住 |
 
 ---
 
@@ -66,18 +64,16 @@ dsh plugin --profile desktop add dshmarket    # 只需一次
 | **✎ 编辑重发** | 用户消息下方的操作行 | 回退该条输入及其回复并重发修改后的文本。默认**只替换被编辑那一轮**（更早的历史保持可见）；可在设置中开启「从新对话开始」让对话从新消息重新开始（此时此前的消息不再进入上下文，视图中也默认保持可见、仅显示标记提示）。新消息下方有一个折叠的「原提问」对照，点击展开、可配置关闭。 |
 | **↻ 重新生成** | 悬停任意助手回复 | 回退并隐藏该回复及其后内容，重新发送原提问，让智能体重新作答。 |
 
-**版本化与回退（0.4.x 已上线）** —— 每次回退都会被记录为一个**版本**：
+**版本化与回退（0.4.54 已上线）** —— 每次回退都会被记录为一个**版本**：
 
 | | 能力 | 说明 |
 |---|---|---|
 | 🕘 | **时间线** | 「版本」Tab（与官方「对话/轨迹」平级）：每个版本的类型/时间/消息数/文件变更徽标，经 `session/projection` 推送帧实时更新（零轮询），大列表窗口化 |
 | ↩️ | **产物回退** | 仅对话 / 仅产物 / 两者，先干跑预览再执行；git 优先 + 内容寻址快照兜底；回退本身是新版本（`restore`），可以再回退 |
 | 🧭 | **跳转对话** | 从时间线一键跳转到对应位置（自动翻页加载更早历史 + 锚点高亮） |
-| 🧹 | **存储有界** | 快照只保留最近 N 个版本（默认 50）；节流后台扫掠回收被截断版本 |
+| 🧹 | **存储有界** | 快照只保留最近 N 个版本（默认 50，可在设置里 1–1000 调整）；后台扫掠串行回收被截断版本，10 分钟内新写入的对象不参与回收，进程重启也不会误删其它会话的快照 |
 
 **为什么与众不同**（交互层差异——上面的保证是存储层）：
-
-**为什么与众不同**
 
 - 🎯 **整轮撤回** —— 一键移除输入 *和* 它的输出（含工具行），而不只是单条气泡。
 - 🖥️ **Web + Desktop 双端** —— 同一插件覆盖 DeepSeek Harness 两种界面。
@@ -93,8 +89,11 @@ dsh plugin --profile desktop add dshmarket    # 只需一次
 包声明了 `dsh.bundle` 清单，可通过官方插件路径安装到任意 profile：
 
 ```sh
-dsh plugin --profile <name> add dsh-retrace
+dsh plugin --profile <name> add github:daha1216/dsh-retrace
 ```
+
+> 注意：`add dsh-retrace`（不带 GitHub 前缀）会从 npm 装到**上游版本**，不包含本 Fork
+> 的 0.4.50–0.4.54 修复。请始终用上面的 GitHub 形式安装。
 
 > ⚠️ **安装后需要重启。** 安装会写入新文件并重新生成 profile 组合，但运行中的应用
 > **不会**热加载 bundle —— 请**退出并重新打开 DSH Desktop**（独立 Web 部署则重启
@@ -115,7 +114,7 @@ dsh plugin --profile <name> add dsh-retrace
    ```json
    {
      "dependencies": {
-       "dsh-retrace": "^0.4.0"
+       "dsh-retrace": "github:daha1216/dsh-retrace"
      },
      "dsh": {
        "profile": {
@@ -143,13 +142,10 @@ dsh plugin --profile <name> add dsh-retrace
 `"dsh-retrace": "file:/路径/to/dsh-retrace"` —— 或者交给 `dsh`：
 `dsh plugin --profile <name> add /路径/to/dsh-retrace`。
 
-### 3. npm 包 + 组合文件（经典方式）
+### 3. 组合文件（cordis.yml，经典方式）
 
-```sh
-npm i dsh-retrace
-```
-
-在所使用的应用/部署的 `cordis.yml` 组合文件中加入一行普通插件条目：
+本 Fork 未发布到 npm registry，所以不能 `npm i dsh-retrace`。若你已有 `dsh` CLI
+装好的 profile（见方式 1），组合文件里加一行普通插件条目即可：
 
 ```yaml
 - name: 'dsh-retrace'
@@ -160,6 +156,9 @@ Client 半区会依据包内 `dsh.client` 元数据被自动打包进 Web 客户
 
 ### 4. 动态插件（当前会话，免安装、免重建）
 
+> ⚠️ 动态入口（`lib/dynamic-host.js` / `lib/dynamic-client.js`）是生成产物，当前停留在
+> **0.4.43**，**不包含** 0.4.44–0.4.54 的修复。建议用方式 1/2 的 bundle 安装。
+
 包内提供了两个自包含的动态入口：
 
 1. 打开插件编辑界面，用 `lib/dynamic-host.js`（Host 半区）和
@@ -168,7 +167,7 @@ Client 半区会依据包内 `dsh.client` 元数据被自动打包进 Web 客户
 3. 完成 —— 悬停任意助手回复或用户消息，即可使用 ↩ / ✎ / ↻。
 
 动态 Host 通过 `harness.handle` 注册同一组操作
-（`retrace.recall` / `retrace.editAndResend` / `retrace.regenerate`）。
+（`retrace.recall` / `retrace.editAndResend` / `retrace.regenerate` 等）。
 
 ---
 
@@ -180,8 +179,27 @@ Client 半区会依据包内 `dsh.client` 元数据被自动打包进 Web 客户
 | **编辑后从新对话开始** | 关 | 编辑后连此前的消息也一并隐藏，让对话看起来像从新消息重新开始（重发前回退整个表面）。默认关：只替换被编辑那一轮的上下文。 |
 | **按标记隐藏被编辑/撤回的消息** | 开 | 开（默认）：撤回/编辑/重新生成按标记隐藏被替换的那一轮消息。关：所有消息保持可见，标记仅显示提示与对照（查看完整历史用）。单个 marker 要隐藏超过 40% 的对话时自动降级为不隐藏（历史永不静默消失）。 |
 | **版本与产物快照** | 开 | 开：每次撤回/编辑记录一个版本（消息与触碰文件），提供时间线与产物回退；关：仅回退上下文，不记录版本、不追踪产物（最省资源）。 |
-| **启用 git 集成** | 开 | 开：工作区是 git 仓库时用 git 记录与回退（不自动提交、不动你的分支），非仓库可在时间线里一键启用；关：一律用内置快照（存于 `~/.dsh`），不触碰工作区 git 状态，功能等价。 |
-| **版本保留上限** | 50 | 文件快照只保留最近 N 个版本，超出自动清理最旧的；时间线记录与审计痕迹始终保留。 |
+| **启用 git 集成** | 开 | 开：工作区是 git 仓库时用 git 记录与回退（不自动提交、不动你的分支）；非仓库可在时间线里一键启用 —— 只新增缺失的 `.gitignore`、一个空基线提交和插件自有 ref `refs/dsh/versions`，删掉该 ref 即可还原插件前的 git 状态。关：一律用内置快照（存于 `~/.dsh/dsh-retrace`），不触碰工作区 git 状态。 |
+| **版本保留上限** | 50 | 文件快照只保留最近 N 个版本（1–1000），超出自动清理最旧的；时间线记录（最多 200 条）与审计痕迹始终保留。 |
+
+---
+
+## 🔄 更新记录（0.4.50 → 0.4.54）
+
+- **0.4.54** —— `git init` 现在把调用会话的沙箱策略传给文件写入，修复 `workspace-write`
+  模式下写 `.gitignore` 被拒（`file access denied`）。
+- **0.4.53** —— 修复 `git init` 把字符串路径当成 fs target 传入导致的 TypeError；
+  `.gitignore` 的 create-if-absent 路径加固。
+- **0.4.52** —— 设置改为合并写并跨标签页同步；HTTP 错误返回真实状态码
+  （400/403/404/409/413/503）；清理死代码路径。
+- **0.4.51** —— span 失败区分 `log-unavailable` / `target-shadowed`；flush 失败以警告
+  上报而不是静默吞掉；会话日志按 size+mtime 缓存，不再每次操作重复全量解压；客户端
+  hook 改为索引查找（消除逐行 O(N²)）；切换会话不再串台。
+- **0.4.50** —— 修复跨会话 GC 误删其它会话快照；快照与 GC 串行化并加 10 分钟宽限；
+  `retentionLimit` 真正生效；产物回退改用版本边界的 HEAD，工作区有未提交改动时拒绝
+  覆盖；支持 `session.vN.jsonl.zstd` 日志文件名；插件 HTTP 路由同源校验 + 仅接受
+  JSON + 反射 CORS；短码/标题/水位操作补齐 HTTP 路由；共享每会话锁；`ensureIdle`
+  15 秒超时；助手撤回两步确认、草稿保护、IME 守卫等体验修复。
 
 ---
 
@@ -214,6 +232,10 @@ Client 半区会依据包内 `dsh.client` 元数据被自动打包进 Web 客户
      （撤回/重新生成），
    - 设置 → 撤回 中的偏好开关与版本保留上限。
 
+4. **HTTP 半区**（`lib/http.js`）：浏览器只走同源 `/api/plugins/retrace/*` —— 跨源请求
+   返回 403，POST 仅接受 `application/json`，错误按 400/403/404/409/413/503 返回；会话
+   日志解析支持 `session.vN.jsonl.zstd` 这类新文件名。
+
 > 这里有两个不同层面：**持久化日志**（只追加；旧事件从不被改写或删除）与
 > **模型可见表面**（由追加的替换事件回退）。因此旧事件作为审计痕迹留在记录中——
 > 但它们会被**同步地从模型上下文和可见对话中清除**，界面始终反映智能体真正看到的内容。
@@ -225,64 +247,59 @@ Client 半区会依据包内 `dsh.client` 元数据被自动打包进 Web 客户
 
 - 只有**用户消息**可以编辑；撤回同时适用于用户与助手消息。工具结果会随区间一并
   被阴影化，但不能单独作为撤回目标。
-- 智能体必须**空闲**：回复流式输出时需先点击 ⏹ 停止，再撤回或编辑；否则 Host
-  返回 `agent-busy`。
+- 智能体必须**空闲**：回复流式输出时会先自动停止并等待（上限 15 秒，
+  `agent-stop-timeout`）；若无法停止则返回 `agent-busy`。
 - 撤回/编辑作用于**活跃模型表面**：已被压缩或此前已撤回的消息会被拒绝
-  （`target-shadowed`）。
+  （`target-shadowed`）；会话日志不可读、内存事件稀疏时返回 `log-unavailable`。
+- 回复停止有 15 秒上限：超时返回 `agent-stop-timeout`，请等回复结束后重试。
+- **产物回退要求工作区干净**：有未提交改动时返回 `working-tree-dirty`，请先提交或丢弃，
+  避免 `git checkout` 覆盖你未保存的修改。
 - 重新生成只重发原提示的**文本**部分；携带图片的提示会退化为仅文本重发。
 
 ---
 
 ## 🗺️ 路线图
 
-**当前已具备（0.4.x）：**
+**当前已具备（0.4.54）：**
 
 - 撤回 / 编辑重发 / 重新生成——每次回退都过**三层写前校验**与安全编辑路径（自动停 agent、临时 step 包裹 marker），**不会损坏日志、不会破坏 /compact**。
-- 单会话**版本时间线** + **产物回退**（git 优先 + 快照兜底、干跑预览、跳转对话）。
+- 单会话**版本时间线** + **产物回退**（git 优先 + 快照兜底、干跑预览、跳转对话、dirty 工作区拒绝覆盖）。
 - 对话视图内的**分叉图** + **会话谱系**。
-- **实时看门狗**——并发写入第一时间快照日志。
+- **看门狗**（默认关闭，`DSH_RETRACE_WATCHDOG=1` 开启）——并发写入第一时间快照日志。
 - 配套 **`dsh-log-contract`**：30+ 条离线契约规则 + 原地修复（`fix --neutralize` / `--clip-crossstep`），能处理会让 /compact 永久失败的会话。
 
-**未来计划**——见 [公开路线图](./docs/ROADMAP.md)（agent 业务层规划：运行时守护、中断治理、生态开放接口）。本 README 只描述已上线的能力。
+**未来计划**：agent 业务层规划（运行时守护、中断治理、生态开放接口）随上游推进；本 README 只描述本仓库已上线的能力。
 
 ---
 
 ## 🛠️ 开发
 
-```sh
-# 目录结构
-lib/host-core.js       # 传输无关的 Host 逻辑（无 import）
-lib/index.js           # 发布版 Host：harness RPC + HTTP 路由
-lib/client.js          # Client 源码（import React；传输层可插拔）
-lib/client.bundle.js   # 构建产物 —— 自注册 loader entry
-                       # （`window.__ModuleLoader__.load`），由 client-modules 提供
-lib/dynamic-host.js    # 生成的动态 Host 半区（源自 lib/host-core.js）
-lib/dynamic-client.js  # 生成的动态 Client 半区（源自 lib/client.js）
-scripts/build-client.mjs      # 打包 lib/client.js → lib/client.bundle.js
-scripts/generate-dynamic.mjs  # 从权威源生成两个动态入口
-scripts/check-dynamic.mjs     # 语法检查动态入口（函数体形态）
-test/                 # vitest 套件：host-core 操作 + 生成产物冒烟测试
-.github/workflows/    # CI（语法 + 构建同步 + 测试）与 npm 发布（v* tag）
-cordis.patch.yml      # dsh.bundle profile patch 层
+本仓库只发布源码，**不包含**私有构建工具链：
+
+```
+lib/host-core.js       # 传输无关的 Host 逻辑
+lib/index.js           # 发布版 Host：服务装配 + HTTP 路由
+lib/client.js          # Client 源码（可读，React）
+lib/client.bundle.js   # 运行时入口（自注册 loader），与 client.js 同步维护
+lib/http.js            # HTTP 半区（同源、仅 JSON、状态码化错误）
+lib/versioning.js      # 快照、GC、git 事实记录
+lib/rollback.js        # 对话/产物回退执行器
+lib/artifact-store.js  # 内容寻址存储（~/.dsh/dsh-retrace/objects）
+lib/git-adapter.js     # git status / checkout / init（走 subprocess seam）
+lib/adapter/           # DSH 会话日志适配器 + marker 写入器
+scripts/e2e-layout.cjs # 布局 E2E（需外部安装 playwright）
+cordis.patch.yml       # dsh.bundle profile patch 层
 ```
 
-```sh
-pnpm install          # 安装开发依赖（vitest、esbuild）
-pnpm check            # 语法检查源码与生成的动态入口
-pnpm build            # 重新生成 lib/dynamic-*.js 与 lib/client.bundle.js
-pnpm test             # 运行 host-core 单元测试
-npm pack --dry-run    # 校验发布文件清单
-```
+- `scripts/build-client.mjs`、`scripts/generate-dynamic.mjs`、`test/` 与 CI workflow
+  **不在**本仓库中——请勿执行 `pnpm build` / `pnpm test`。
+- 修改客户端必须同时改 `lib/client.js` 与 `lib/client.bundle.js`，两者都要通过
+  `node --check`。
+- `lib/dynamic-*.js` 是生成产物，当前落后于发布版（0.4.43）；安装请用 bundle 形式。
+- 语法检查：`node --check lib/*.js`（`dynamic-client.js` / `dynamic-host.js` 报
+  `Illegal return statement` 属预期，它们是注入式函数体片段）。
 
-> ⚠️ **生成文件。** `lib/dynamic-host.js`、`lib/dynamic-client.js` 与
-> `lib/client.bundle.js` 是由 `lib/host-core.js` 和 `lib/client.js` 生成的构建
-> 产物 —— **请勿手改**。CI 会在构建产物与源码不同步时失败
-> （`git diff --exit-code`），因此提交前记得执行 `pnpm build`。动态 Client 与
-> 发布版共用同一份 client 源码，仅通过 `__setMessageEditorWire` 切换传输层
-> （`host.call` vs HTTP 路由）。
-
-欢迎提交 PR 与 issue —— 见 [CONTRIBUTING](./CONTRIBUTING.md)（筹备中）与
-[问题追踪](https://github.com/yamingmou/dsh-retrace/issues)。
+欢迎提交 PR 与 issue —— 见[问题追踪](https://github.com/daha1216/dsh-retrace/issues)。
 
 ---
 
@@ -290,8 +307,8 @@ npm pack --dry-run    # 校验发布文件清单
 
 收录于 [dsh-plugin topic](https://github.com/topics/dsh-plugin)。
 
-**Agent 业务层（生产级保证）** 的一部分——见 [公开路线图](./docs/ROADMAP.md)
-（框架无关的业务层定义，dsh-retrace 是它在 DeepSeek Harness 上的实现）。配套组件：
+**Agent 业务层（生产级保证）** 的一部分——框架无关的业务层定义由上游维护，dsh-retrace
+是它在 DeepSeek Harness 上的实现。配套组件：
 
 - [**dsh-log-contract**](https://github.com/yamingmou/dsh-log-contract) —— 业务层的
   「医生」：30+ 条离线契约规则 + 原地修复（`fix --neutralize` / `--clip-crossstep`）。
@@ -300,9 +317,9 @@ npm pack --dry-run    # 校验发布文件清单
 > **直接从 GitHub 安装**（无需 npm registry —— 适合把本仓库链接丢给 AI，或想装最新提交）：
 >
 > ```sh
-> dsh plugin --profile desktop add github:yamingmou/dsh-retrace
+> dsh plugin --profile desktop add github:daha1216/dsh-retrace
 > # 或直接用 pnpm 装进 profile：
-> cd ~/.dsh/profiles/desktop && pnpm add github:yamingmou/dsh-retrace
+> cd ~/.dsh/profiles/desktop && pnpm add github:daha1216/dsh-retrace
 > ```
 >
 > 然后照常重启 DSH Desktop。`dsh-log-contract` 依赖会自动带上。
@@ -318,6 +335,9 @@ DeepSeek Harness 插件生态的精选总览见
 由 [OfferKuai](https://www.offerkuai.com) 团队开发——一款 AI 求职助手，使命是
 「用户要的是结果，而不是反复的对话」。创始人：Zhaofeng（Yaming）。本插件以开源
 形式发布，回馈 DeepSeek Harness 社区。
+
+本仓库为 [daha1216](https://github.com/daha1216) 维护的兼容修复 Fork：上游能力照旧，
+额外包含 0.4.50–0.4.54 的数据安全与体验修复（见「更新记录」）。
 
 ## 📄 License
 
