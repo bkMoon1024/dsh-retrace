@@ -1,7 +1,7 @@
 # 🧭 dsh-retrace
 
 > A session time machine for DeepSeek Harness — a personal compatibility-fix fork of
-> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.54**.
+> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.55**.
 
 Recall a whole turn, edit-and-resend a past prompt, or regenerate a reply — while the
 conversation state and the workspace files it touched are versioned together. Every rollback
@@ -48,8 +48,23 @@ hot-load bundles. If `dsh` is not on your PATH, prefix the command with
 
 ---
 
-## 🔄 Recent changes (0.4.50 → 0.4.54)
+## 🔄 Recent changes (0.4.50 → 0.4.55)
 
+- **0.4.55** — dark-mode visual fixes. Several tokens were used with the wrong semantics or
+  never defined at all, which broke the recall editor, marker pills, reference blocks and the
+  settings switches in dark theme: `--dsw-alias-bg-elevated`, `--dsw-alias-fill-l2`,
+  `--dsw-alias-state-warning-primary`, `--dsw-alias-state-info-primary`,
+  `--dsw-alias-state-success-bg` and `--dsw-font-mono` are undefined in DSH; they now map to
+  `--dsw-alias-bg-layer-3`, `--dsw-alias-interactive-bg-hover`,
+  `--dsw-alias-state-warn-primary`, `--dsw-alias-state-business-primary`,
+  `--dsw-alias-state-success-tertiary` and `--ds-font-family-code`. The orange send button's
+  white label sat at 2.26:1 on orange and is now dark `#20160b` (7.86:1), with the error
+  confirm button that reuses its styles restoring its own foreground. The settings switches
+  now follow the host's token pairing (off: `border-l3` + `switch-thumb`; on:
+  `button-primary-fill` + `label-primary-foreground`), lifting knob contrast from about 2:1
+  to 18:1 in dark theme. Hard-coded `rgba(0,0,0,…)` shadows moved to
+  `--dsw-shadow-lv1` / `--dsw-shadow-lv2`. The orange palette is the plugin's own design
+  language and stays as is.
 - **0.4.54** — `git init` now passes the session's sandbox policy, fixing `.gitignore` writes
   being denied under `workspace-write`.
 - **0.4.53** — fixed `git init` passing a string path where the fs seam expects a resolved
