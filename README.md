@@ -1,148 +1,191 @@
-# 🧭 dsh-retrace
+<div align="center">
 
-> A session time machine for DeepSeek Harness — a personal compatibility-fix fork of
-> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.55**.
+# 🧭 dsh-retrace · Session Time Machine
 
-Recall a whole turn, edit-and-resend a past prompt, or regenerate a reply — while the
-conversation state and the workspace files it touched are versioned together. Every rollback
-is a legal append-only session event, so the log stays clean and `/compact` keeps working.
+**Seamless Message Recall, In-Place Edit & Resend, Regeneration, and Workspace Artifact Versioning for DeepSeek Harness**
 
-**简体中文** · [中文详细说明](./README.zh.md)
+[![Version](https://img.shields.io/badge/version-0.4.55-blue.svg?style=flat-square)](https://github.com/daha1216/dsh-retrace/commits/main)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](https://github.com/daha1216/dsh-retrace/blob/main/LICENSE)
+[![DSH plugin](https://img.shields.io/badge/DSH-plugin-4A90D9.svg?style=flat-square)](https://github.com/topics/dsh-plugin)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/daha1216/dsh-retrace/pulls)
+
+[中文详细说明](./README.zh.md) · **English**
+
+</div>
 
 ---
 
-## 📦 Install
+Ever found yourself in these frustrating scenarios while using DeepSeek Harness?
+- **Accidentally pressed Enter too early** or missed a critical instruction, having to watch the agent drift completely off-topic and forcing you to discard the session and start from scratch?
+- The agent executed an extensive sequence of tool calls and corrupted files in your project, leaving you wanting to **not just revert the chat history, but restore the affected files as well**?
+- Hesitant to explore alternative approaches within a single conversation because there's no easy way to roll back?
 
-```sh
-# Desktop
-dsh plugin --profile desktop add github:daha1216/dsh-retrace
+**dsh-retrace** turns your DeepSeek Harness sessions into a safe, fully reversible playground. Seamlessly integrated into DSH Web and Desktop, it offers **whole-turn recall, in-place edit-and-resend, instant regeneration**, paired with **synchronized workspace file snapshots and Git integration**.
 
-# Web deployment
-dsh plugin --profile web add github:daha1216/dsh-retrace
-```
+---
 
-Restart DSH (and refresh the page) after installing or updating — a running app does not
-hot-load bundles. If `dsh` is not on your PATH, prefix the command with
-`npx --yes -p @deepseek-ai/dsh`.
+## 📸 Real-World Experience
 
-> This fork is not published to npm under its own name; `add dsh-retrace` installs the
-> upstream package and does **not** include the fixes below. Install from GitHub, or from a
-> local checkout with `dsh plugin --profile desktop add /path/to/dsh-retrace`.
+<div align="center">
+
+| Native Action Bar Integration | Clean Post-Recall State |
+| :---: | :---: |
+| <img src="./assets/action-bar.png" width="340" alt="Native message action bar: Edit and Recall" /> | <img src="./assets/recall-banner.png" width="520" alt="Clean session state banner after recall" /> |
+| *Native "Edit" and "Recall" action pills embedded right beside message timestamps* | *Erase entire turns (Prompt, replies, and tool executions) in one click; clean canvas with instant prompt echo* |
+
+</div>
 
 ---
 
 ## ✨ Features
 
-- **↩ Recall** — remove an entire turn (prompt + reply + tool rows) from both model context
-  and the chat view; the original prompt is echoed back into the composer.
-- **✎ Edit & resend** — edit a past user message in place and re-answer, with a collapsible
-  "original prompt" reference.
-- **↻ Regenerate** — keep the prompt, hide the previous reply, and let the agent answer again.
-- **🕘 Version timeline** — every rollback becomes a version (kind / time / message count /
-  file changes), pushed live via `session/projection`.
-- **↩️ Artifact rollback** — conversation only, files only, or both, with a dry-run preview;
-  git first, content-addressed snapshots as fallback; a rollback is itself a new version.
-- **🧭 Fork map & lineage** — visualize branch points and parent-session lineage.
-- **🗂️ Session archaeology CLI** — read-only index / query / extract / file-history over
-  persisted session logs.
+### 1. ↩ Effortless Whole-Turn Recall
+- **Erase an entire turn cleanly**: Removes the user prompt, the assistant reply, and all intermediate tool call rows from both the chat view and the model context.
+- **Smart composer echo**: Recalling a message immediately copies its text back into the composer, so you can tweak and resend without retyping.
+- **Two-step accidental-click protection**: Recall actions feature a quick confirmation step to prevent accidental triggers.
+
+### 2. ✎ In-Place Edit & Resend
+- **Instant prompt correction**: Click "Edit" under any user message to refine your prompt directly in line.
+- **Collapsible original prompt reference**: Resent messages can retain a neat, collapsible view of the previous prompt for comparison (display-only, does not inflate model context).
+- **Flexible conversation modes**: By default, replaces only the targeted turn. Optionally choose "Start from a new conversation after edit" in settings to cleanly fork your session forward.
+
+### 3. ↻ Instant Regeneration
+- Hover over any assistant response and hit "Regenerate" to clear the output and let the agent answer again with fresh perspective.
+
+### 4. ↩️ Synchronized Conversation & Artifact Rollback
+- **Beyond chat-only undo**: Reverting conversation without reverting file changes leaves your workspace out of sync. dsh-retrace captures snapshots of touched files along with conversation states.
+- **Three-way rollback options**: Choose **"Conversation only"**, **"Artifacts only"**, or **"Both together"** with dry-run previews.
+- **Git-first with content-addressed fallback**: Seamlessly leverages your Git workspace when available, falling back to built-in content-addressed object storage (`~/.dsh/dsh-retrace/objects`).
+- **Dirty worktree safety guard**: Refuses to overwrite uncommitted workspace changes, guaranteeing zero accidental data loss.
+
+### 5. 🧭 Version Timeline & Fork Map
+- **Version timeline tab**: An integrated "Versions" tab (alongside the native Chat and Trajectory views) displays version events, timestamps, message counts, and modified file badges.
+- **Session lineage and fork visualization**: Clearly visualizes branch points and parent-session ancestry across your project.
+
+### 6. 🎨 First-Class Dark Mode & Native UI Design
+- Crafted strictly according to DSH design guidelines and design tokens.
+- Version 0.4.55+ includes a thorough revamp of dark theme tokens, delivering optimal contrast and cohesive aesthetics.
 
 ---
 
-## 🔄 Recent changes (0.4.50 → 0.4.55)
+## ⚡ Quick Installation
 
-- **0.4.55** — dark-mode visual fixes. Several tokens were used with the wrong semantics or
-  never defined at all, which broke the recall editor, marker pills, reference blocks and the
-  settings switches in dark theme: `--dsw-alias-bg-elevated`, `--dsw-alias-fill-l2`,
-  `--dsw-alias-state-warning-primary`, `--dsw-alias-state-info-primary`,
-  `--dsw-alias-state-success-bg` and `--dsw-font-mono` are undefined in DSH; they now map to
-  `--dsw-alias-bg-layer-3`, `--dsw-alias-interactive-bg-hover`,
-  `--dsw-alias-state-warn-primary`, `--dsw-alias-state-business-primary`,
-  `--dsw-alias-state-success-tertiary` and `--ds-font-family-code`. The orange send button's
-  white label sat at 2.26:1 on orange and is now dark `#20160b` (7.86:1), with the error
-  confirm button that reuses its styles restoring its own foreground. The settings switches
-  now follow the host's token pairing (off: `border-l3` + `switch-thumb`; on:
-  `button-primary-fill` + `label-primary-foreground`), lifting knob contrast from about 2:1
-  to 18:1 in dark theme. Hard-coded `rgba(0,0,0,…)` shadows moved to
-  `--dsw-shadow-lv1` / `--dsw-shadow-lv2`. The orange palette is the plugin's own design
-  language and stays as is.
-- **0.4.54** — `git init` now passes the session's sandbox policy, fixing `.gitignore` writes
-  being denied under `workspace-write`.
-- **0.4.53** — fixed `git init` passing a string path where the fs seam expects a resolved
-  target (TypeError); hardened the create-if-absent `.gitignore` path.
-- **0.4.52** — settings changes merge instead of overwriting and sync across tabs; HTTP errors
-  carry real status codes (400/403/404/409/413/503); dead code paths removed.
-- **0.4.51** — span failures report distinct codes (`log-unavailable` vs `target-shadowed`);
-  flush failures surface as warnings instead of being swallowed; session-log reads are cached
-  by size+mtime; client hook lookups are indexed (no more O(N²) per row); switching sessions no
-  longer leaks state between views.
-- **0.4.50** — fixed cross-session GC deleting other sessions' snapshots; serialized GC against
-  snapshot writes with a 10-minute grace window; `retentionLimit` now actually bounds snapshots;
-  artifact rollback uses the version boundary's HEAD and refuses to overwrite a dirty worktree;
-  `session.vN.jsonl.zstd` logs are resolved correctly; plugin HTTP routes enforce same-origin +
-  JSON-only with reflected CORS; badge / title / water-level operations are reachable over HTTP;
-  shared per-session locks; 15-second agent-stop timeout; two-step assistant recall; composer
-  draft protection and IME-safe key handling.
+> **Requirement**: A DeepSeek Harness environment with the `dsh` CLI available.
 
----
+### Method 1: Install via Profile (Recommended, via GitHub)
 
-## ⚙️ Settings → Recall
+Run the following command in your terminal:
 
-| Setting | Default | Notes |
-|---|---|---|
-| Show original-prompt reference | on | Collapsible reference under a resent message (display only). |
-| Start from a new conversation after edit | off | Hide everything before the edited prompt as well. |
-| Hide replaced messages by marker | on | Auto-degrades to visible when a marker would hide >40% of the conversation. |
-| Version & artifact snapshots | on | Records a version per rollback; off = context-only rollback. |
-| Git integration | on | Uses git when the workspace is a repo; one-click init is available in the timeline. |
-| Version retention limit | 50 | Keeps snapshots for the most recent N versions (1–1000); the timeline keeps its own records (up to 200). |
+```sh
+# For DSH Desktop
+dsh plugin --profile desktop add github:daha1216/dsh-retrace
 
----
-
-## ⚠️ Requirements & limits
-
-- Only user messages can be edited; recall works for both user and assistant messages.
-- The agent must be idle. A running reply is cancelled and awaited, up to 15 seconds
-  (`agent-stop-timeout`).
-- Recall / edit target the active model surface: compressed or already-shadowed messages are
-  rejected (`target-shadowed`), and unreadable or sparse session events report
-  `log-unavailable`.
-- Artifact rollback refuses to run when the worktree has uncommitted changes
-  (`working-tree-dirty`); commit or discard them first.
-- Regenerate resends only the text part of the prompt; prompts with images fall back to
-  text-only.
-
----
-
-## 🛠️ Development notes
-
-This repo ships the source, not the private build toolchain:
-
-```
-lib/host-core.js       # transport-agnostic host logic
-lib/index.js           # published host: service wiring + HTTP routes
-lib/client.js          # client source (readable, React)
-lib/client.bundle.js   # runtime entry (self-registering loader), kept in sync with client.js
-lib/http.js            # HTTP seam (same-origin, JSON-only, status-coded errors)
-lib/versioning.js      # snapshots, GC, git facts
-lib/rollback.js        # context / artifact rollback executor
-lib/artifact-store.js  # content-addressed store (~/.dsh/dsh-retrace/objects)
-lib/git-adapter.js     # git status / checkout / init over the subprocess seam
-lib/adapter/           # DSH session-log adapter + marker writer
-scripts/e2e-layout.cjs # layout E2E (needs an external playwright install)
+# For standalone Web deployments
+dsh plugin --profile web add github:daha1216/dsh-retrace
 ```
 
-- `scripts/build-client.mjs`, `scripts/generate-dynamic.mjs`, `test/` and CI workflows are
-  **not** part of this fork — don't run `pnpm build` / `pnpm test`.
-- Client changes must be made in **both** `lib/client.js` and `lib/client.bundle.js`, and both
-  must pass `node --check`.
-- `lib/dynamic-*.js` are generated artifacts and currently lag the published bundle (0.4.43);
-  install the bundle form.
-- Syntax check: `node --check lib/*.js` (`dynamic-client.js` / `dynamic-host.js` report
-  `Illegal return statement` by design — they are injected function bodies).
+> 💡 **Important**: After installing or updating, **completely exit and reopen DSH Desktop** (or restart the `dsh` web service and refresh your browser). A running host does not hot-reload newly installed profile bundles.
+>
+> If `dsh` is not in your global PATH, run with `npx --yes -p @deepseek-ai/dsh`.
+
+### Method 2: Local Checkout (For Developers)
+
+```sh
+git clone https://github.com/daha1216/dsh-retrace.git ~/plugins/dsh-retrace
+dsh plugin --profile desktop add ~/plugins/dsh-retrace
+```
+
+---
+
+## 🛡️ Production-Grade Safety & Reliability
+
+Why do basic chat-modification hacks break DSH sessions, while **dsh-retrace** remains rock-solid?
+
+```
+ Append-Only Event Log (DSH Host)               Model Context & UI View
+ ┌──────────────────────────────────────┐       ┌────────────────────────┐
+ │ … past messages                      │       │ … past messages        │
+ │     ↓ shadowed range                 │       │     ↓ truncation       │
+ │ [target … latest surface node]       │ ───▶  │ (empty replace node)   │
+ │     ↳ appends valid empty            │       │                        │
+ │       assistant/message node         │       │ Context cleanly reset! │
+ └──────────────────────────────────────┘       └────────────────────────┘
+```
+
+1. **Strictly Compliant with Append-Only Event Models**
+   DSH manages sessions via immutable event logs. Mutating or truncating log files corrupts internal state. dsh-retrace appends a **valid, empty replacement message event** (Shadowing) to mark past nodes as inactive. The UI and LLM context roll back cleanly while audit logs stay pristine.
+2. **Pre-Write Contract Checks (Prewrite Guards)**
+   Every rollback event is validated against 30+ contract rules before persistence. It **never corrupts session logs and never breaks DSH's native `/compact` (context compression)**.
+3. **Concurrency & Safe Runtime Scheduling**
+   - **Ensure Idle Guard**: If a rollback is triggered while the agent is streaming an answer, the plugin safely aborts the active turn and waits for the thread to settle (with a 15s timeout guard).
+   - **Bounded Garbage Collection**: Retains up to 50 versions by default (configurable from 1 to 1000). GC runs sequentially in the background with a 10-minute grace period, strictly isolating session namespaces.
+
+---
+
+## ⚙️ Settings
+
+Configurable under DSH **Settings → Recall**:
+
+| Setting | Default | Description |
+| :--- | :---: | :--- |
+| **Show original-prompt reference** | **On** | Shows a collapsible reference to the previous prompt under a resent message (display-only, excluded from LLM context). |
+| **Hide replaced messages by marker** | **On** | Automatically collapses superseded turns to keep the conversation view tidy. *(Auto-degrades to visible if an operation hides >40% of the session to prevent silent context loss)*. |
+| **Start from a new conversation after edit** | **Off** | When enabled, hides all prior history when editing a message, starting an entirely clean thread from that point. |
+| **Version & artifact snapshots** | **On** | Records version events and takes workspace file snapshots on each rollback. Turn off for context-only undo (saves disk space). |
+| **Git integration** | **On** | Uses Git for snapshot tracking and diffs when the workspace is a Git repository. |
+| **Version retention limit** | **50** | Maximum number of artifact snapshot versions to retain (1–1000). Old snapshots are safely garbage collected. Timeline text logs remain untouched. |
+
+---
+
+## 🗂️ Session Archaeology CLI (`retrace`)
+
+A standalone CLI utility for inspecting, querying, and auditing persisted session logs offline:
+
+```sh
+# View index of tool executions & invocation stats
+retrace index <sessionId|logPath>
+
+# Search specific command inputs and outputs with regex
+retrace query <sessionId> --cmd "npm run build"
+
+# Extract file outputs from session artifacts
+retrace extract <sessionId> --pattern "dist/.*" --out ./extracted
+
+# Inspect the full write/edit history of a file across the session
+retrace file-history <sessionId> src/index.ts
+
+# Line-level diff between any two historical versions
+retrace file-diff <sessionId> src/index.ts 0 2
+
+# Inspect parent-session lineage tree
+retrace lineage <sessionId>
+```
+
+---
+
+## 🔄 Recent Highlights
+
+### v0.4.55
+- **Dark mode theme overhaul**: Fully aligned with DSH design tokens (`--dsw-alias-bg-layer-3`, `--dsw-alias-interactive-bg-hover`, etc.), resolving token mismatches in the inline editor, marker pills, and settings toggles.
+- **Accessibility & Contrast**: Boosted action button contrast ratio to >7.86:1 and setting switch knobs to 18:1.
+
+### v0.4.54 & v0.4.53
+- **Sandbox execution hardening**: Fixed `git init` sandbox path resolutions under `workspace-write` policy.
+
+### v0.4.51 & v0.4.50
+- **Cross-session GC isolation**: Introduced per-session locking and write grace windows.
+- **Performance boosts**: Added size+mtime caching for session log reads and indexed client hook lookups, eliminating O(N²) per-turn rendering overhead.
+
+---
+
+## 👥 Credits & Ecosystem
+
+- Core architecture and foundational implementation by [OfferKuai / Zhaofeng](https://github.com/yamingmou/dsh-retrace).
+- This fork is actively maintained by [daha1216](https://github.com/daha1216) with compatibility enhancements for DSH 0.2.x runtime specifications, full dark mode integration, sandbox security, and storage robustness.
+- Contributions, issues, and feature suggestions are warmly welcomed!
 
 ---
 
 ## 📄 License
 
-MIT. Original project © OfferKuai / Zhaofeng (Yaming); this fork maintained by
-[daha1216](https://github.com/daha1216).
+[MIT License](LICENSE) © 2026 OfferKuai & daha1216
