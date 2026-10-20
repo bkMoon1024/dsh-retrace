@@ -4,7 +4,7 @@
 
 **为 DeepSeek Harness 带来优雅的消息撤回、原地编辑、重新生成与代码产物版本化**
 
-[![Version](https://img.shields.io/badge/version-0.4.55-blue.svg?style=flat-square)](https://github.com/daha1216/dsh-retrace/commits/main)
+[![Version](https://img.shields.io/badge/version-0.4.56-blue.svg?style=flat-square)](https://github.com/daha1216/dsh-retrace/commits/main)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](https://github.com/daha1216/dsh-retrace/blob/main/LICENSE)
 [![DSH plugin](https://img.shields.io/badge/DSH-plugin-4A90D9.svg?style=flat-square)](https://github.com/topics/dsh-plugin)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/daha1216/dsh-retrace/pulls)
@@ -167,6 +167,8 @@ retrace lineage <sessionId>
 
 ## 🔄 更新日志（精选）
 
+### v0.4.56
+- **会话短码回归纯展示**：改名与打开 Retrace / 分叉视图不再把短码写进会话标题；升级后首次启动会自动还原旧版本写入的历史标题。
 ### v0.4.55
 - **深色模式视觉与令牌深度重构**：全面对齐 DSH 官方 Design Tokens（`--dsw-alias-bg-layer-3`、`--dsw-alias-interactive-bg-hover` 等），修复深色模式下撤回编辑器、胶囊指示器与设置项开关的视觉失真问题。
 - **高对比度无障碍提升**：调整主操作按钮的前景对比度（提升至 7.86:1 以上），设置开关旋钮对比度提升至 18:1。

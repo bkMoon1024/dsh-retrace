@@ -4,7 +4,7 @@
 
 **Seamless Message Recall, In-Place Edit & Resend, Regeneration, and Workspace Artifact Versioning for DeepSeek Harness**
 
-[![Version](https://img.shields.io/badge/version-0.4.55-blue.svg?style=flat-square)](https://github.com/daha1216/dsh-retrace/commits/main)
+[![Version](https://img.shields.io/badge/version-0.4.56-blue.svg?style=flat-square)](https://github.com/daha1216/dsh-retrace/commits/main)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](https://github.com/daha1216/dsh-retrace/blob/main/LICENSE)
 [![DSH plugin](https://img.shields.io/badge/DSH-plugin-4A90D9.svg?style=flat-square)](https://github.com/topics/dsh-plugin)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/daha1216/dsh-retrace/pulls)
@@ -165,6 +165,8 @@ retrace lineage <sessionId>
 
 ## 🔄 Recent Highlights
 
+### v0.4.56
+- **Session badges are display-only again**: Renaming a session, and opening the Retrace or Fork views, no longer writes the shortcode into the session title. Titles written by earlier versions are restored automatically on the first startup after upgrading.
 ### v0.4.55
 - **Dark mode theme overhaul**: Fully aligned with DSH design tokens (`--dsw-alias-bg-layer-3`, `--dsw-alias-interactive-bg-hover`, etc.), resolving token mismatches in the inline editor, marker pills, and settings toggles.
 - **Accessibility & Contrast**: Boosted action button contrast ratio to >7.86:1 and setting switch knobs to 18:1.
