@@ -5,7 +5,7 @@
 **撤回 · 编辑重发 · 重新生成**，加上**写安全**的会话版本化 —— DeepSeek Harness 的
 **Agent 业务层（生产级保证）** 实现。
 
-[![Version](https://img.shields.io/badge/version-0.4.57-blue)](https://github.com/daha1216/dsh-retrace/commits/main)
+[![Version](https://img.shields.io/badge/version-0.4.58-blue)](https://github.com/daha1216/dsh-retrace/commits/main)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/daha1216/dsh-retrace/blob/main/LICENSE)
 [![DSH plugin](https://img.shields.io/badge/DSH-plugin-4A90D9)](https://github.com/topics/dsh-plugin)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](https://github.com/daha1216/dsh-retrace/pulls)
@@ -15,7 +15,7 @@
 </div>
 
 > 本仓库是 [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace) 的个人兼容修复
-> Fork（维护者 daha1216），当前版本 **0.4.57**。0.4.50–0.4.56 的数据安全、体验与深色模式修复见下方
+> Fork（维护者 daha1216），当前版本 **0.4.58**。0.4.50–0.4.56 的数据安全、体验与深色模式修复见下方
 > 「更新记录」；安装请从本 Fork 的 GitHub 直装（详见安装章节）。
 
 **撤回 / 编辑重发 / 重新生成** —— 每个会话都该有的三个操作。但回退不只是「撤掉一条
@@ -32,7 +32,7 @@
 > 需要带 `dsh` CLI 的 DeepSeek Harness；装完**重启 DSH** 生效（运行中的应用不会热加载）。
 
 ```sh
-# 推荐：从本 Fork 的 GitHub 直装（含 0.4.50–0.4.57 修复）
+# 推荐：从本 Fork 的 GitHub 直装（含 0.4.50–0.4.58 修复）
 dsh plugin --profile desktop add github:daha1216/dsh-retrace   # DSH 桌面版
 # 或 Web 部署：dsh plugin --profile web add github:daha1216/dsh-retrace
 # 或从 ZIP 解压后：dsh plugin --profile desktop add ~/plugins/dsh-retrace
@@ -93,7 +93,7 @@ dsh plugin --profile <name> add github:daha1216/dsh-retrace
 ```
 
 > 注意：`add dsh-retrace`（不带 GitHub 前缀）会从 npm 装到**上游版本**，不包含本 Fork
-> 的 0.4.50–0.4.57 修复。请始终用上面的 GitHub 形式安装。
+> 的 0.4.50–0.4.58 修复。请始终用上面的 GitHub 形式安装。
 
 > ⚠️ **安装后需要重启。** 安装会写入新文件并重新生成 profile 组合，但运行中的应用
 > **不会**热加载 bundle —— 请**退出并重新打开 DSH Desktop**（独立 Web 部署则重启
@@ -184,8 +184,15 @@ Client 半区会依据包内 `dsh.client` 元数据被自动打包进 Web 客户
 
 ---
 
-## 🔄 更新记录（0.4.50 → 0.4.57）
+## 🔄 更新记录（0.4.50 → 0.4.58）
 
+- **0.4.58** —— 产物存储按会话分区。快照引用与 git 事实改为
+  `<会话ID>|<版本ID>|<路径>` 键：此前两个会话都走到第 10 轮时会写出同一个键，审计
+  实测一个会话的回退能取到另一个会话的字节、git 事实也会互相覆盖。本版之前写入的
+  行没有会话 ID，按“无法归属”处理——GC 永不释放、按会话查询永不命中，因为归属
+  无法可靠恢复。清理时只释放本次清理会话自己截断掉的版本。新增
+  `GET /api/plugins/retrace/storage` 只读报告存储现状（对象数、引用数、遗留行、
+  孤儿对象），不做任何删除。
 - **0.4.57** —— 宿主契约统一。所有读取方改为走同一层归一
   （`lib/adapter/normalize.js`）：同时认识两代 marker（旧 `data.message.id`、现行顶层
   `data.id`），事件行改用能识别 `baseSeq` 的查找而不是 `events[seq]`，并把宿主自己的

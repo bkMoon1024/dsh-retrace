@@ -1,7 +1,7 @@
 # 🧭 dsh-retrace
 
 > A session time machine for DeepSeek Harness — a personal compatibility-fix fork of
-> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.57**.
+> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.58**.
 
 Recall a whole turn, edit-and-resend a past prompt, or regenerate a reply — while the
 conversation state and the workspace files it touched are versioned together. Every rollback
@@ -48,8 +48,18 @@ hot-load bundles. If `dsh` is not on your PATH, prefix the command with
 
 ---
 
-## 🔄 Recent changes (0.4.50 → 0.4.57)
+## 🔄 Recent changes (0.4.50 → 0.4.58)
 
+- **0.4.58** — session-scoped artifact storage. Snapshot references and git
+  facts are now keyed by session (`<sessionId>|<versionId>|<path>`), so two
+  sessions that both reach seq 10 no longer write the same key: the audit showed
+  one session's rollback could resolve the other session's bytes and its git
+  facts could overwrite the other's. Rows written before this release have no
+  session id and are treated as unattributable: they are never released by GC
+  and never match a session-scoped lookup, because the owner cannot be recovered
+  reliably. The sweep now releases only the sweeping session's own truncated
+  versions. `GET /api/plugins/retrace/storage` reports what the store holds
+  (objects, references, legacy rows, orphans) without deleting anything.
 - **0.4.57** — host contract unification. Every reader now goes through one
   normalisation layer (`lib/adapter/normalize.js`) that understands both marker
   generations (legacy `data.message.id`, current top-level `data.id`), derives

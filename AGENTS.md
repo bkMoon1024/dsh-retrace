@@ -14,6 +14,12 @@
 `log[seq - baseSeq]` 索引，`events[seq]` 只对 baseSeq=0 成立），并导出现在宿主自己的
 `foldSurface`。新增读取方一律走它，不要自己 `event.data.message?.id` 或 `events[seq]`。
 
+**产物存储的键一律带会话 ID**（0.4.58 起）：引用是 `<sessionId>|<versionId>|<path>`，
+git 事实键是 `<sessionId>|<versionId>`，构造函数 `refFor()` / `versionKey()` 在
+`lib/artifact-store.js`。版本号是会话内序号，脱离会话就不唯一；没有会话 ID 的旧行
+（`parseRef().legacy`）一律视为不可归属——GC 不释放、按会话查询不命中，不要给它们
+猜归属。
+
 ## 1. 构建链约束
 
 - `package.json` 里的 `build` / `check` 脚本引用 `scripts/*.mjs`，**该目录不在仓库里（私有工具链），跑不了也别试图修复**。
@@ -39,7 +45,7 @@ better-display 已于 2026-09-14 从 web profile 卸载（用户不要独立阅�
 
 ## 4. 部署闭环（注意 profile 钉了 commit）
 
-**当前版本**：v0.4.57。profile（`C:/Users/daha/.dsh/profiles/desktop/package.json`）里钉的是
+**当前版本**：v0.4.58。profile（`C:/Users/daha/.dsh/profiles/desktop/package.json`）里钉的是
 `"dsh-retrace": "github:daha1216/dsh-retrace#<commit>"`（hash 随部署更新，以 profile 实况为准）。
 
 **改完视觉样式后的最小验证闭环**（每步都别跳，缺一步就可能在旧代码上白验）：
