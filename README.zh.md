@@ -5,7 +5,7 @@
 **撤回 · 编辑重发 · 重新生成**，加上**写安全**的会话版本化 —— DeepSeek Harness 的
 **Agent 业务层（生产级保证）** 实现。
 
-[![Version](https://img.shields.io/badge/version-0.4.55-blue)](https://github.com/daha1216/dsh-retrace/commits/main)
+[![Version](https://img.shields.io/badge/version-0.4.56-blue)](https://github.com/daha1216/dsh-retrace/commits/main)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/daha1216/dsh-retrace/blob/main/LICENSE)
 [![DSH plugin](https://img.shields.io/badge/DSH-plugin-4A90D9)](https://github.com/topics/dsh-plugin)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](https://github.com/daha1216/dsh-retrace/pulls)
@@ -15,7 +15,7 @@
 </div>
 
 > 本仓库是 [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace) 的个人兼容修复
-> Fork（维护者 daha1216），当前版本 **0.4.55**。0.4.50–0.4.55 的数据安全、体验与深色模式修复见下方
+> Fork（维护者 daha1216），当前版本 **0.4.56**。0.4.50–0.4.56 的数据安全、体验与深色模式修复见下方
 > 「更新记录」；安装请从本 Fork 的 GitHub 直装（详见安装章节）。
 
 **撤回 / 编辑重发 / 重新生成** —— 每个会话都该有的三个操作。但回退不只是「撤掉一条
@@ -32,7 +32,7 @@
 > 需要带 `dsh` CLI 的 DeepSeek Harness；装完**重启 DSH** 生效（运行中的应用不会热加载）。
 
 ```sh
-# 推荐：从本 Fork 的 GitHub 直装（含 0.4.50–0.4.55 修复）
+# 推荐：从本 Fork 的 GitHub 直装（含 0.4.50–0.4.56 修复）
 dsh plugin --profile desktop add github:daha1216/dsh-retrace   # DSH 桌面版
 # 或 Web 部署：dsh plugin --profile web add github:daha1216/dsh-retrace
 # 或从 ZIP 解压后：dsh plugin --profile desktop add ~/plugins/dsh-retrace
@@ -93,7 +93,7 @@ dsh plugin --profile <name> add github:daha1216/dsh-retrace
 ```
 
 > 注意：`add dsh-retrace`（不带 GitHub 前缀）会从 npm 装到**上游版本**，不包含本 Fork
-> 的 0.4.50–0.4.55 修复。请始终用上面的 GitHub 形式安装。
+> 的 0.4.50–0.4.56 修复。请始终用上面的 GitHub 形式安装。
 
 > ⚠️ **安装后需要重启。** 安装会写入新文件并重新生成 profile 组合，但运行中的应用
 > **不会**热加载 bundle —— 请**退出并重新打开 DSH Desktop**（独立 Web 部署则重启
@@ -184,8 +184,18 @@ Client 半区会依据包内 `dsh.client` 元数据被自动打包进 Web 客户
 
 ---
 
-## 🔄 更新记录（0.4.50 → 0.4.55）
+## 🔄 更新记录（0.4.50 → 0.4.56）
 
+- **0.4.56** —— 安全止损：产物回退与自动 GC 默认关闭。审计确认边界期快照、快照回写与
+  自动清理在当前宿主契约下无法证明安全，因此本版把它们做成宿主侧能力门控
+  （`lib/capabilities.js`）：`contextEdit` 开（撤回/编辑重发/重新生成不变），
+  `contextRestore`、`artifactCapture`、`artifactRestore`、`artifactGc` 全部关。被关的操作
+  统一返回 `capability-disabled`（HTTP 503），客户端时间线因此不再展示产物回退按钮；
+  `GET /api/plugins/retrace/capabilities` 暴露当前门控，运维可用
+  `DSH_RETRACE_CAPABILITIES='{"artifactGc":true}'` 单项打开。同时修掉三个客户端问题：
+  浏览时间线/分叉图不再写入会话标题（此前会把人工标题改写成短码前缀），预览未加载完成
+  时确认按钮禁用、工作区脏只拦产物类回退而不拦纯对话回退，回退部分失败或持久化告警时
+  弹层保持打开并列出失败文件。
 - **0.4.55** —— 深色模式视觉修复。多个令牌语义用错或根本不存在，导致深色下撤回编辑器、
   标记胶囊、引用块与设置页开关失真：`--dsw-alias-bg-elevated`、`--dsw-alias-fill-l2`、
   `--dsw-alias-state-warning-primary`、`--dsw-alias-state-info-primary`、

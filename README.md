@@ -1,7 +1,7 @@
 # 🧭 dsh-retrace
 
 > A session time machine for DeepSeek Harness — a personal compatibility-fix fork of
-> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.55**.
+> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.56**.
 
 Recall a whole turn, edit-and-resend a past prompt, or regenerate a reply — while the
 conversation state and the workspace files it touched are versioned together. Every rollback
@@ -48,8 +48,21 @@ hot-load bundles. If `dsh` is not on your PATH, prefix the command with
 
 ---
 
-## 🔄 Recent changes (0.4.50 → 0.4.55)
+## 🔄 Recent changes (0.4.50 → 0.4.56)
 
+- **0.4.56** — safety stop-loss: artifact rollback and automatic GC now ship disabled.
+  The audit could not prove boundary-time capture, snapshot write-back or the automatic
+  sweep safe against the current host contracts, so they are host-enforced capability
+  gates (`lib/capabilities.js`): `contextEdit` stays on (recall / edit-and-resend /
+  regenerate are unchanged) while `contextRestore`, `artifactCapture`, `artifactRestore`
+  and `artifactGc` are off. Gated operations answer `capability-disabled` (HTTP 503), the
+  timeline hides the artifact rollback entry, `GET /api/plugins/retrace/capabilities`
+  reports the active gates, and an operator can re-enable one with
+  `DSH_RETRACE_CAPABILITIES='{"artifactGc":true}'`. Also fixes three client issues:
+  mounting the timeline or fork map no longer writes session titles, the rollback confirm
+  button stays disabled until the preview loads, a dirty work tree blocks only artifact
+  scopes instead of context-only restores, and a partially applied rollback or persistence
+  warning keeps the dialog open with the failed files listed.
 - **0.4.55** — dark-mode visual fixes. Several tokens were used with the wrong semantics or
   never defined at all, which broke the recall editor, marker pills, reference blocks and the
   settings switches in dark theme: `--dsw-alias-bg-elevated`, `--dsw-alias-fill-l2`,
