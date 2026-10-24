@@ -1,7 +1,7 @@
 # 🧭 dsh-retrace
 
 > A session time machine for DeepSeek Harness — a personal compatibility-fix fork of
-> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.60**.
+> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.61**.
 
 Recall a whole turn, edit-and-resend a past prompt, or regenerate a reply — while the
 conversation state and the workspace files it touched are versioned together. Every rollback
@@ -48,8 +48,16 @@ hot-load bundles. If `dsh` is not on your PATH, prefix the command with
 
 ---
 
-## 🔄 Recent changes (0.4.50 → 0.4.60)
+## 🔄 Recent changes (0.4.50 → 0.4.61)
 
+- **0.4.61** — the plugin API is reachable only from this host's own UI. Every
+  request must come from a loopback host (a tunnel or LAN address is opt-in via
+  `DSH_RETRACE_ALLOW_REMOTE=1`), every mutating request must carry the
+  `x-retrace-client` header that only the plugin's page can set without a
+  preflight, and `git/init` now needs an explicit confirmation flag and fails
+  closed when the session's sandbox policy cannot be resolved. Read-only GETs
+  stay reachable without credentials — they expose no file contents beyond what
+  the workspace already contains.
 - **0.4.60** — rollback is a two-step operation with a server-issued ticket.
   Preview returns a single-use `planId` bound to the session, version, scope and
   current revision; execute refuses to run without it (`plan-required`), refuses

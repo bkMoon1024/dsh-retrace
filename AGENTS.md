@@ -20,6 +20,12 @@ git 事实键是 `<sessionId>|<versionId>`，构造函数 `refFor()` / `versionK
 （`parseRef().legacy`）一律视为不可归属——GC 不释放、按会话查询不命中，不要给它们
 猜归属。
 
+**请求边界**（0.4.61 起）：插件路由不受宿主鉴权保护，因此自带三道闸——Host 必须是
+环回地址（隧道/局域网需 `DSH_RETRACE_ALLOW_REMOTE=1` 显式开启），写请求必须带
+`x-retrace-client: web`（错误码 `host-not-allowed` / `client-header-required`，均 403），
+`git/init` 需要 `confirm: true` 且沙箱策略解析失败时以 `sandbox-policy-unavailable`
+失败关闭。只读 GET 不要求凭据，改动前先确认它不暴露工作区之外的内容。
+
 **回退票据与审计**（0.4.60 起）：`POST /rollback/preview` 返回一次性 `planId`，
 `POST /rollback` 必须带它；错误码 `plan-required` / `plan-expired` / `plan-used` /
 `plan-mismatch` / `plan-stale` / `restore-unsupported` 一律映射 HTTP 409。每次执行
@@ -56,7 +62,7 @@ better-display 已于 2026-09-14 从 web profile 卸载（用户不要独立阅�
 
 ## 4. 部署闭环（注意 profile 钉了 commit）
 
-**当前版本**：v0.4.60。profile（`C:/Users/daha/.dsh/profiles/desktop/package.json`）里钉的是
+**当前版本**：v0.4.61。profile（`C:/Users/daha/.dsh/profiles/desktop/package.json`）里钉的是
 `"dsh-retrace": "github:daha1216/dsh-retrace#<commit>"`（hash 随部署更新，以 profile 实况为准）。
 
 **改完视觉样式后的最小验证闭环**（每步都别跳，缺一步就可能在旧代码上白验）：
