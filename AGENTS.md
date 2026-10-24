@@ -20,6 +20,12 @@ git 事实键是 `<sessionId>|<versionId>`，构造函数 `refFor()` / `versionK
 （`parseRef().legacy`）一律视为不可归属——GC 不释放、按会话查询不命中，不要给它们
 猜归属。
 
+**快照写入的三条不变量**（0.4.59 起）：①同一 sha 的引用读改写走 `withSha()` 串行链，
+否则同内容并发快照会丢引用；②引用写入失败时若对象是新建的就删掉，不留孤儿；③sweep
+先 `settleSnapshots()` 等在途快照，再算 keep。边界捕获若在读取期间被更新的边界动过同一
+路径，引用会进 `racy` 数组，回退侧必须用 `snapshotState()`（不是 `resolveSnapshot()`）
+判断并拒绝，理由码 `snapshot-racy`。
+
 ## 1. 构建链约束
 
 - `package.json` 里的 `build` / `check` 脚本引用 `scripts/*.mjs`，**该目录不在仓库里（私有工具链），跑不了也别试图修复**。
@@ -45,7 +51,7 @@ better-display 已于 2026-09-14 从 web profile 卸载（用户不要独立阅�
 
 ## 4. 部署闭环（注意 profile 钉了 commit）
 
-**当前版本**：v0.4.58。profile（`C:/Users/daha/.dsh/profiles/desktop/package.json`）里钉的是
+**当前版本**：v0.4.59。profile（`C:/Users/daha/.dsh/profiles/desktop/package.json`）里钉的是
 `"dsh-retrace": "github:daha1216/dsh-retrace#<commit>"`（hash 随部署更新，以 profile 实况为准）。
 
 **改完视觉样式后的最小验证闭环**（每步都别跳，缺一步就可能在旧代码上白验）：

@@ -1,7 +1,7 @@
 # 🧭 dsh-retrace
 
 > A session time machine for DeepSeek Harness — a personal compatibility-fix fork of
-> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.58**.
+> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.59**.
 
 Recall a whole turn, edit-and-resend a past prompt, or regenerate a reply — while the
 conversation state and the workspace files it touched are versioned together. Every rollback
@@ -48,8 +48,16 @@ hot-load bundles. If `dsh` is not on your PATH, prefix the command with
 
 ---
 
-## 🔄 Recent changes (0.4.50 → 0.4.58)
+## 🔄 Recent changes (0.4.50 → 0.4.59)
 
+- **0.4.59** — snapshot writes are transactional. References to one object are
+  serialized per content address (two files with identical content used to lose
+  one of the two references), a reference write that fails drops the object it
+  just published instead of leaving an orphan, and a sweep waits for in-flight
+  snapshots so it can no longer delete a blob another session published a moment
+  ago. A boundary capture that could not be proven to belong to its version (a
+  later boundary touched the same path first) is marked racy and refused by
+  restore, rather than writing newer content over older state.
 - **0.4.58** — session-scoped artifact storage. Snapshot references and git
   facts are now keyed by session (`<sessionId>|<versionId>|<path>`), so two
   sessions that both reach seq 10 no longer write the same key: the audit showed
