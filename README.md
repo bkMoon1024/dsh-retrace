@@ -1,7 +1,7 @@
 # 🧭 dsh-retrace
 
 > A session time machine for DeepSeek Harness — a personal compatibility-fix fork of
-> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.63**.
+> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.64**.
 
 Recall a whole turn, edit-and-resend a past prompt, or regenerate a reply — while the
 conversation state and the workspace files it touched are versioned together. Every rollback
@@ -48,8 +48,14 @@ hot-load bundles. If `dsh` is not on your PATH, prefix the command with
 
 ---
 
-## 🔄 Recent changes (0.4.50 → 0.4.63)
+## 🔄 Recent changes (0.4.50 → 0.4.64)
 
+- **0.4.64** — the bundle is generated again. `node scripts/build-client.mjs`
+  rebuilds `lib/client.bundle.js` from `lib/client.js` with a deterministic
+  transform (react through `require`, `badge.js` inlined, exports mapped), so the
+  two files can no longer drift. `node scripts/check-syntax.mjs` checks syntax,
+  version consistency and bundle sync in one pass, and the `build` / `check`
+  entries in package.json now point at scripts that actually exist.
 - **0.4.63** — the rollback dialog behaves like a dialog. It carries
   `role="dialog"`, `aria-modal`, moves focus to Cancel on open and returns it
   on close, and Escape cancels — except while a rollback is running. Recalled
