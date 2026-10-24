@@ -1,7 +1,7 @@
 # 🧭 dsh-retrace
 
 > A session time machine for DeepSeek Harness — a personal compatibility-fix fork of
-> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.61**.
+> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.62**.
 
 Recall a whole turn, edit-and-resend a past prompt, or regenerate a reply — while the
 conversation state and the workspace files it touched are versioned together. Every rollback
@@ -48,8 +48,15 @@ hot-load bundles. If `dsh` is not on your PATH, prefix the command with
 
 ---
 
-## 🔄 Recent changes (0.4.50 → 0.4.61)
+## 🔄 Recent changes (0.4.50 → 0.4.62)
 
+- **0.4.62** — the marker hide plan is linear again. Every marker used to
+  rescan the whole node map to resolve its shadowed rows, so a 2 000-row session
+  with 200 markers cost 444 400 node visits per snapshot; one shared seq index
+  brings the same case to 6 600 (34–67× fewer, measured by the isolated client
+  suite). Jumping to a version's anchor now reads the current host snapshot
+  shape and seeks with `loadThrough` instead of paging 50 rows at a time — the
+  old `snapshot.chat.nodes` path made every jump give up silently.
 - **0.4.61** — the plugin API is reachable only from this host's own UI. Every
   request must come from a loopback host (a tunnel or LAN address is opt-in via
   `DSH_RETRACE_ALLOW_REMOTE=1`), every mutating request must carry the
