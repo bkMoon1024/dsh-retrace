@@ -1,7 +1,7 @@
 # 🧭 dsh-retrace
 
 > A session time machine for DeepSeek Harness — a personal compatibility-fix fork of
-> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.66**.
+> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.67**.
 
 Recall a whole turn, edit-and-resend a past prompt, or regenerate a reply — while the
 conversation state and the workspace files it touched are versioned together. Every rollback
@@ -48,8 +48,14 @@ hot-load bundles. If `dsh` is not on your PATH, prefix the command with
 
 ---
 
-## 🔄 Recent changes (0.4.50 → 0.4.66)
+## 🔄 Recent changes (0.4.50 → 0.4.67)
 
+- **0.4.67** — boundary-time capture and the sweep are on. Every version boundary now
+  snapshots the files that boundary touched (4 MB per file, deduplicated by content) and
+  records the git HEAD/dirty pair, so the timeline can show what actually changed. The
+  sweep that releases refs and deletes unreferenced objects runs again, with the 10-minute
+  grace and the in-flight guard from 0.4.59. Artifact restore stays off — it is the only
+  path that writes user files, and it should be exercised against real captured history first.
 - **0.4.66** — the dynamic-plugin entry points are gone. `lib/dynamic-client.js` and
   `lib/dynamic-host.js` had been frozen at 0.4.43, which meant anyone using that path got
   single-click recall, no request gate and no rollback ticket. The files and their `exports`
@@ -132,9 +138,11 @@ hot-load bundles. If `dsh` is not on your PATH, prefix the command with
 - **0.4.56** — safety stop-loss: artifact rollback and automatic GC now ship disabled.
   The audit could not prove boundary-time capture, snapshot write-back or the automatic
   sweep safe against the current host contracts, so they are host-enforced capability
-  gates (`lib/capabilities.js`): `contextEdit` stays on (recall / edit-and-resend /
-  regenerate are unchanged) while `contextRestore`, `artifactCapture`, `artifactRestore`
-  and `artifactGc` are off. Gated operations answer `capability-disabled` (HTTP 503), the
+  gates (`lib/capabilities.js`). 0.4.67 opened the two read-only ones —
+  `artifactCapture` (boundary-time snapshots + git facts, never writes the workspace) and
+  `artifactGc` (sweep that only deletes objects nothing references) — while
+  `contextRestore` and `artifactRestore` stay off. Gated operations answer
+  `capability-disabled` (HTTP 503), the
   timeline hides the artifact rollback entry, `GET /api/plugins/retrace/capabilities`
   reports the active gates, and an operator can re-enable one with
   `DSH_RETRACE_CAPABILITIES='{"artifactGc":true}'`. Also fixes three client issues:
