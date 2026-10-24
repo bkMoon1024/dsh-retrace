@@ -1,7 +1,7 @@
 {
   "name": "dsh-retrace",
   "description": "Session Time Machine for DeepSeek Harness: Seamless message recall, edit-and-resend, regenerate, and synchronized workspace artifact versioning for Web and Desktop.",
-  "version": "0.4.56",
+  "version": "0.4.57",
   "packageManager": "pnpm@11.7.0",
   "type": "module",
   "main": "lib/index.js",

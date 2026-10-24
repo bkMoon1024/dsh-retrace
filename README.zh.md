@@ -87,6 +87,8 @@ dsh plugin --profile web add github:daha1216/dsh-retrace
 > 💡 **重要提示**：安装或更新完成后，**请完全退出并重新打开 DSH 桌面端**（独立 Web 部署请重启 `dsh` 进程并刷新浏览器）。正在运行的 DSH 宿主不会热加载新注入的 bundle 模块。
 >
 > 若系统中未将 `dsh` 注册到全局 PATH，可在命令前添加 `npx --yes -p @deepseek-ai/dsh`。
+>
+> **兼容性**：`@deepseek-ai/dsh-*` 的 peer 声明为 `^0.1.0-rc.6 || ^0.2.0-rc.1`，即 **DSH 0.1.x 与 0.2.x（不含 0.3.0）**。装到不匹配的版本时，插件管理器会以 `incompatible-version` 明确拒绝；确实要在别的版本上试，可用 `dsh plugin allow-version` 加一次性豁免。DSH 升到 0.3.x 后需要本插件发新版放开范围。
 
 ### 方式二：从本地目录安装（开发者推荐）
 

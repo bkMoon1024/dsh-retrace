@@ -84,9 +84,11 @@ dsh plugin --profile desktop add github:daha1216/dsh-retrace
 dsh plugin --profile web add github:daha1216/dsh-retrace
 ```
 
-> 💡 **Important**: After installing or updating, **completely exit and reopen DSH Desktop** (or restart the `dsh` web service and refresh your browser). A running host does not hot-reload newly installed profile bundles.
+> 💡 **Important**: After installing or updating, **completely exit and reopen DSH Desktop** (or restart the `dsh web` service and refresh your browser). A running host does not hot-reload newly installed profile bundles.
 >
 > If `dsh` is not in your global PATH, run with `npx --yes -p @deepseek-ai/dsh`.
+>
+> **Compatibility**: the `@deepseek-ai/dsh-*` peer dependencies declare `^0.1.0-rc.6 || ^0.2.0-rc.1`, i.e. **DSH 0.1.x and 0.2.x (up to but not including 0.3.0)**. On an unsupported runtime the plugin manager refuses with `incompatible-version`; add a one-off exemption with `dsh plugin allow-version` if you really need to try it elsewhere. Once DSH reaches 0.3.x this plugin needs a new release to widen the range.
 
 ### Method 2: Local Checkout (For Developers)
 
