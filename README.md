@@ -1,7 +1,7 @@
 # 🧭 dsh-retrace
 
 > A session time machine for DeepSeek Harness — a personal compatibility-fix fork of
-> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.62**.
+> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.63**.
 
 Recall a whole turn, edit-and-resend a past prompt, or regenerate a reply — while the
 conversation state and the workspace files it touched are versioned together. Every rollback
@@ -48,8 +48,13 @@ hot-load bundles. If `dsh` is not on your PATH, prefix the command with
 
 ---
 
-## 🔄 Recent changes (0.4.50 → 0.4.62)
+## 🔄 Recent changes (0.4.50 → 0.4.63)
 
+- **0.4.63** — the rollback dialog behaves like a dialog. It carries
+  `role="dialog"`, `aria-modal`, moves focus to Cancel on open and returns it
+  on close, and Escape cancels — except while a rollback is running. Recalled
+  images are now bound to the draft that started them: if the echoed text was
+  already sent, the images are dropped instead of landing in the next message.
 - **0.4.62** — the marker hide plan is linear again. Every marker used to
   rescan the whole node map to resolve its shadowed rows, so a 2 000-row session
   with 200 markers cost 444 400 node visits per snapshot; one shared seq index
