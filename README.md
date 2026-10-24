@@ -1,7 +1,7 @@
 # 🧭 dsh-retrace
 
 > A session time machine for DeepSeek Harness — a personal compatibility-fix fork of
-> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.67**.
+> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.68**.
 
 Recall a whole turn, edit-and-resend a past prompt, or regenerate a reply — while the
 conversation state and the workspace files it touched are versioned together. Every rollback
@@ -48,8 +48,14 @@ hot-load bundles. If `dsh` is not on your PATH, prefix the command with
 
 ---
 
-## 🔄 Recent changes (0.4.50 → 0.4.67)
+## 🔄 Recent changes (0.4.50 → 0.4.68)
 
+- **0.4.68** — `retrace store migrate` freezes the legacy era explicitly. Refs written
+  before 0.4.58 carry no session id and their `versiongit` rows do not either, so there
+  is no honest way to attribute them; the command records that fact in
+  `legacy-frozen.json` and drops only refcount rows whose object is already gone. It
+  never rewrites a ref and never deletes a blob. Run it with the host stopped — the
+  live process holds the domain file in memory.
 - **0.4.67** — boundary-time capture and the sweep are on. Every version boundary now
   snapshots the files that boundary touched (4 MB per file, deduplicated by content) and
   records the git HEAD/dirty pair, so the timeline can show what actually changed. The

@@ -31,7 +31,7 @@ async function logContract() {
   return import('dsh-log-contract');
 }
 import { replayFileHistory, diffLines, resolveSessionFile, lineageOf } from '../lib/archaeology-cli.js';
-import { inventory, pruneOrphans } from '../lib/store-cli.js';
+import { inventory, migrate, pruneOrphans } from '../lib/store-cli.js';
 
 const USAGE = `dsh-retrace 考古 CLI —— 会话日志数据/审计资产挖掘（只读）
 
@@ -43,7 +43,8 @@ const USAGE = `dsh-retrace 考古 CLI —— 会话日志数据/审计资产挖�
   retrace file-diff <session> <path> <v1> <v2>
   retrace lineage <session> [--json]
   retrace store inventory [--verify-hashes] [--json]
-  retrace store gc [--apply --yes] [--json]`;
+  retrace store gc [--apply --yes] [--json]
+  retrace store migrate [--apply --yes] [--json]`;
 
 function fail(msg) {
   process.stderr.write(`❌ ${msg}\n\n${USAGE}\n`);
@@ -151,7 +152,7 @@ async function main() {
     const sub = positional[0];
     const root = join(process.env.DSH_HOME ?? join(homedir(), '.dsh'), 'dsh-retrace');
     const domainFile = join(process.env.DSH_HOME ?? join(homedir(), '.dsh'), 'storages', 'retrace.json');
-    if (sub === 'inventory' || sub === 'gc') {
+    if (sub === 'inventory' || sub === 'gc' || sub === 'migrate') {
       const report = inventory({ domainFile, root, verifyHashes: rest.includes('--verify-hashes') });
       if (sub === 'inventory') {
         if (json) return process.stdout.write(JSON.stringify({ root, domainFile, ...report, objects: report.objects.length }, null, 2) + '\n');
@@ -161,6 +162,21 @@ async function main() {
         process.stdout.write(`   零引用行 ${report.zeroRefRows.length} ｜ 悬空引用 ${report.dangling.length} ｜ 孤儿对象 ${report.orphans.length}（${report.orphans.reduce((sum, object) => sum + object.size, 0)} 字节）\n`);
         if (report.mismatched.length > 0) process.stdout.write(`   ⚠ 内容哈希不符 ${report.mismatched.length} 个\n`);
         process.stdout.write(`   清理预演：retrace store gc（dry-run）；真正删除加 --apply --yes\n`);
+      } else if (sub === 'migrate') {
+        const apply = rest.includes('--apply');
+        const yes = rest.includes('--yes');
+        if (apply && !yes) fail('store migrate --apply 需要同时给 --yes（确认改写 domain 文件）');
+        const result = migrate({ domainFile, root, apply });
+        if (json) return process.stdout.write(JSON.stringify({ root, domainFile, ...result }, null, 2) + '\n');
+        process.stdout.write(`🧾 retrace store migrate —— ${root}（${result.mode}）\n`);
+        process.stdout.write(`   legacy 引用 ${result.frozen.legacyRefs} 条 / 涉及对象 ${result.frozen.objectsKept} 个（冻结保留）\n`);
+        process.stdout.write(`   可清理的纯元数据行 ${result.droppableRows} 条\n`);
+        if (apply) {
+          process.stdout.write(`   已删除 ${result.droppedRows} 行；备份 ${result.backupPath}\n`);
+          process.stdout.write(`   冻结说明 ${result.sidecarPath}\n`);
+        } else {
+          process.stdout.write('   未改写任何文件（加 --apply --yes 才执行）\n');
+        }
       } else {
         const apply = rest.includes('--apply');
         const yes = rest.includes('--yes');
@@ -174,7 +190,7 @@ async function main() {
         if (report.legacyRefs.length > 0) process.stdout.write(`   注意：${report.legacyRefs.length} 条 legacy 引用指向的对象被保留（无法判断归属）\n`);
       }
     } else {
-      fail(`未知 store 子命令 "${sub ?? ''}"（inventory / gc）`);
+      fail(`未知 store 子命令 "${sub ?? ''}"（inventory / gc / migrate）`);
     }
   } else {
     fail(cmd ? `未知命令 "${cmd}"` : '缺少命令');

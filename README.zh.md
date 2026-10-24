@@ -5,7 +5,7 @@
 **撤回 · 编辑重发 · 重新生成**，加上**写安全**的会话版本化 —— DeepSeek Harness 的
 **Agent 业务层（生产级保证）** 实现。
 
-[![Version](https://img.shields.io/badge/version-0.4.67-blue)](https://github.com/daha1216/dsh-retrace/commits/main)
+[![Version](https://img.shields.io/badge/version-0.4.68-blue)](https://github.com/daha1216/dsh-retrace/commits/main)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/daha1216/dsh-retrace/blob/main/LICENSE)
 [![DSH plugin](https://img.shields.io/badge/DSH-plugin-4A90D9)](https://github.com/topics/dsh-plugin)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](https://github.com/daha1216/dsh-retrace/pulls)
@@ -15,7 +15,7 @@
 </div>
 
 > 本仓库是 [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace) 的个人兼容修复
-> Fork（维护者 daha1216），当前版本 **0.4.67**。0.4.50–0.4.67 的数据安全、体验与深色模式修复见下方
+> Fork（维护者 daha1216），当前版本 **0.4.68**。0.4.50–0.4.68 的数据安全、体验与深色模式修复见下方
 > 「更新记录」；安装请从本 Fork 的 GitHub 直装（详见安装章节）。
 
 **撤回 / 编辑重发 / 重新生成** —— 每个会话都该有的三个操作。但回退不只是「撤掉一条
@@ -32,7 +32,7 @@
 > 需要带 `dsh` CLI 的 DeepSeek Harness；装完**重启 DSH** 生效（运行中的应用不会热加载）。
 
 ```sh
-# 推荐：从本 Fork 的 GitHub 直装（含 0.4.50–0.4.67 修复）
+# 推荐：从本 Fork 的 GitHub 直装（含 0.4.50–0.4.68 修复）
 dsh plugin --profile desktop add github:daha1216/dsh-retrace   # DSH 桌面版
 # 或 Web 部署：dsh plugin --profile web add github:daha1216/dsh-retrace
 # 或从 ZIP 解压后：dsh plugin --profile desktop add ~/plugins/dsh-retrace
@@ -93,7 +93,7 @@ dsh plugin --profile <name> add github:daha1216/dsh-retrace
 ```
 
 > 注意：`add dsh-retrace`（不带 GitHub 前缀）会从 npm 装到**上游版本**，不包含本 Fork
-> 的 0.4.50–0.4.67 修复。请始终用上面的 GitHub 形式安装。
+> 的 0.4.50–0.4.68 修复。请始终用上面的 GitHub 形式安装。
 
 > ⚠️ **安装后需要重启。** 安装会写入新文件并重新生成 profile 组合，但运行中的应用
 > **不会**热加载 bundle —— 请**退出并重新打开 DSH Desktop**（独立 Web 部署则重启
@@ -179,8 +179,13 @@ Client 半区会依据包内 `dsh.client` 元数据被自动打包进 Web 客户
 
 ---
 
-## 🔄 更新记录（0.4.50 → 0.4.67）
+## 🔄 更新记录（0.4.50 → 0.4.68）
 
+- **0.4.68** —— `retrace store migrate` 把 legacy 时代显式冻结。0.4.58 之前的引用没有
+  会话 id，对应的 `versiongit` 行也没有，任何「按时间/路径猜归属」都会把 A 会话的快照
+  算到 B 会话头上；这个命令只把这件事写进 `legacy-frozen.json`，并删掉「对象已经不在」
+  的零引用行。它绝不重写引用、绝不删 blob。请在宿主停止时运行——运行中的进程把 domain
+  文件持有在内存里。
 - **0.4.67** —— 边界快照与自动清理重新打开。每个版本边界会抓取该边界触碰过的文件
   （单文件上限 4 MB，按内容去重）并记录 git HEAD/dirty，时间线因此能看到到底改了什么。
   释放引用、删除无引用对象的清理也恢复运行，保留 0.4.59 的 10 分钟宽限期与在途快照保护。
