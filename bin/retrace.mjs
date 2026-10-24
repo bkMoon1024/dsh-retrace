@@ -16,12 +16,22 @@
  *       两个历史版本的行级 diff（A3）
  *   retrace lineage <session> [--json]
  *       会话 parent 链谱系（A4，分叉图数据源）
+ *   retrace store inventory [--verify-hashes] [--json]
+ *       产物库盘点：对象/引用/legacy/悬空/孤儿（只读，I）
+ *   retrace store gc [--apply --yes] [--json]
+ *       清理无人引用的对象（默认 dry-run，I）
  *
  * <session> 为完整文件路径或 sessionId（自动在 ~/.dsh/sessions 查找）。
  */
 import fs from 'node:fs';
-import { loadSessionLog, extractToolOutputs, auditToolCalls } from 'dsh-log-contract';
+import { homedir } from 'node:os';
+import { join } from 'node:path';
+/** 会话日志库只在考古命令里用到；store 子命令必须能在没装依赖时离线跑。 */
+async function logContract() {
+  return import('dsh-log-contract');
+}
 import { replayFileHistory, diffLines, resolveSessionFile, lineageOf } from '../lib/archaeology-cli.js';
+import { inventory, pruneOrphans } from '../lib/store-cli.js';
 
 const USAGE = `dsh-retrace 考古 CLI —— 会话日志数据/审计资产挖掘（只读）
 
@@ -31,7 +41,9 @@ const USAGE = `dsh-retrace 考古 CLI —— 会话日志数据/审计资产挖�
   retrace extract <session> --pattern <regex> --out <dir> [--min-size N]
   retrace file-history <session> <path> [--json]
   retrace file-diff <session> <path> <v1> <v2>
-  retrace lineage <session> [--json]`;
+  retrace lineage <session> [--json]
+  retrace store inventory [--verify-hashes] [--json]
+  retrace store gc [--apply --yes] [--json]`;
 
 function fail(msg) {
   process.stderr.write(`❌ ${msg}\n\n${USAGE}\n`);
@@ -48,9 +60,10 @@ const opt = (name, def) => {
   return i >= 0 && rest[i + 1] ? rest[i + 1] : def;
 };
 
-function main() {
+async function main() {
   if (cmd === 'index') {
     const file = resolveSessionFile(positional[0] ?? fail('index 需要 <session>'));
+    const { loadSessionLog, auditToolCalls } = await logContract();
     const log = loadSessionLog(file);
     const report = auditToolCalls(log.events.map((e) => e.event));
     if (json) return process.stdout.write(JSON.stringify({ file, ...report }, null, 2) + '\n');
@@ -65,6 +78,7 @@ function main() {
     const pattern = opt('--cmd', opt('--pattern', ''));
     if (!pattern) fail(`${cmd} 需要 --cmd/--pattern <regex>`);
     const file = resolveSessionFile(positional[0] ?? fail(`${cmd} 需要 <session>`));
+    const { loadSessionLog, extractToolOutputs } = await logContract();
     const log = loadSessionLog(file);
     const minSize = cmd === 'extract' ? Number(opt('--min-size', '50')) : 0;
     const { pairs, total } = extractToolOutputs(log.events.map((e) => e.event), pattern, { minSize });
@@ -88,6 +102,7 @@ function main() {
   } else if (cmd === 'file-history') {
     const file = resolveSessionFile(positional[0] ?? fail('file-history 需要 <session>'));
     const path = positional[1] ?? fail('file-history 需要 <path>');
+    const { loadSessionLog } = await logContract();
     const log = loadSessionLog(file);
     const { files } = replayFileHistory(log.events.map((e) => e.event));
     const history = files.get(path) ?? [];
@@ -106,6 +121,7 @@ function main() {
     const v1 = Number(positional[2]);
     const v2 = Number(positional[3]);
     if (!Number.isInteger(v1) || !Number.isInteger(v2)) fail('file-diff 需要 <v1> <v2>（版本索引）');
+    const { loadSessionLog } = await logContract();
     const log = loadSessionLog(file);
     const { files } = replayFileHistory(log.events.map((e) => e.event));
     const history = files.get(path) ?? [];
@@ -125,13 +141,43 @@ function main() {
     if (lines.length > 40) process.stdout.write(`   … 其余 ${lines.length - 40} 行\n`);
   } else if (cmd === 'lineage') {
     const file = resolveSessionFile(positional[0] ?? fail('lineage 需要 <session>'));
+    const { loadSessionLog } = await logContract();
     const log = loadSessionLog(file);
     const lineage = lineageOf(log);
     if (json) return process.stdout.write(JSON.stringify(lineage, null, 2) + '\n');
     process.stdout.write(`🌿 retrace lineage —— ${lineage.id}\n`);
     process.stdout.write(`   parent: ${lineage.parentId ?? '(无，根会话)'}\n`);
+  } else if (cmd === 'store') {
+    const sub = positional[0];
+    const root = join(process.env.DSH_HOME ?? join(homedir(), '.dsh'), 'dsh-retrace');
+    const domainFile = join(process.env.DSH_HOME ?? join(homedir(), '.dsh'), 'storages', 'retrace.json');
+    if (sub === 'inventory' || sub === 'gc') {
+      const report = inventory({ domainFile, root, verifyHashes: rest.includes('--verify-hashes') });
+      if (sub === 'inventory') {
+        if (json) return process.stdout.write(JSON.stringify({ root, domainFile, ...report, objects: report.objects.length }, null, 2) + '\n');
+        process.stdout.write(`📦 retrace store inventory —— ${root}\n`);
+        process.stdout.write(`   对象 ${report.objects.length} 个 / ${report.objectBytes} 字节 ｜ 引用行 ${report.refRows} ｜ 版本行 ${report.versionRows}\n`);
+        process.stdout.write(`   引用：scoped ${report.scopedRefs.length} ｜ legacy ${report.legacyRefs.length}（归属不可恢复，永不自动回收）\n`);
+        process.stdout.write(`   零引用行 ${report.zeroRefRows.length} ｜ 悬空引用 ${report.dangling.length} ｜ 孤儿对象 ${report.orphans.length}（${report.orphans.reduce((sum, object) => sum + object.size, 0)} 字节）\n`);
+        if (report.mismatched.length > 0) process.stdout.write(`   ⚠ 内容哈希不符 ${report.mismatched.length} 个\n`);
+        process.stdout.write(`   清理预演：retrace store gc（dry-run）；真正删除加 --apply --yes\n`);
+      } else {
+        const apply = rest.includes('--apply');
+        const yes = rest.includes('--yes');
+        if (apply && !yes) fail('store gc --apply 需要同时给 --yes（确认删除孤儿对象）');
+        const result = apply ? pruneOrphans(report) : { removed: 0, bytes: 0, failed: [] };
+        if (json) return process.stdout.write(JSON.stringify({ root, mode: apply ? 'apply' : 'dry-run', candidates: report.orphans.length, candidateBytes: report.orphans.reduce((sum, object) => sum + object.size, 0), ...result }, null, 2) + '\n');
+        process.stdout.write(`🧹 retrace store gc —— ${root}（${apply ? 'APPLY' : 'dry-run'}）\n`);
+        process.stdout.write(`   孤儿对象 ${report.orphans.length} 个 / ${report.orphans.reduce((sum, object) => sum + object.size, 0)} 字节\n`);
+        if (apply) process.stdout.write(`   已删除 ${result.removed} 个 / ${result.bytes} 字节${result.failed.length > 0 ? ` ｜ 失败 ${result.failed.length}` : ''}\n`);
+        else process.stdout.write('   未删除任何文件（加 --apply --yes 才执行）\n');
+        if (report.legacyRefs.length > 0) process.stdout.write(`   注意：${report.legacyRefs.length} 条 legacy 引用指向的对象被保留（无法判断归属）\n`);
+      }
+    } else {
+      fail(`未知 store 子命令 "${sub ?? ''}"（inventory / gc）`);
+    }
   } else {
     fail(cmd ? `未知命令 "${cmd}"` : '缺少命令');
   }
 }
-main();
+await main();

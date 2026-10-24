@@ -1,7 +1,7 @@
 # 🧭 dsh-retrace
 
 > A session time machine for DeepSeek Harness — a personal compatibility-fix fork of
-> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.64**.
+> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.65**.
 
 Recall a whole turn, edit-and-resend a past prompt, or regenerate a reply — while the
 conversation state and the workspace files it touched are versioned together. Every rollback
@@ -48,8 +48,14 @@ hot-load bundles. If `dsh` is not on your PATH, prefix the command with
 
 ---
 
-## 🔄 Recent changes (0.4.50 → 0.4.64)
+## 🔄 Recent changes (0.4.50 → 0.4.65)
 
+- **0.4.65** — the artifact store can be inspected and cleaned offline.
+  `retrace store inventory` classifies every object as live, legacy (refs written
+  before 0.4.58 that carry no session id), dangling or orphan; `retrace store gc`
+  is a dry run unless you pass `--apply --yes`, and it only ever deletes objects
+  nothing points at — legacy refs are kept because their owner cannot be
+  recovered. The command needs no host and no session-log dependency.
 - **0.4.64** — the bundle is generated again. `node scripts/build-client.mjs`
   rebuilds `lib/client.bundle.js` from `lib/client.js` with a deterministic
   transform (react through `require`, `badge.js` inlined, exports mapped), so the
