@@ -9,6 +9,11 @@
 
 只改 client.js 等于没改；两个文件都要动，改完各自 `node --check`。
 
+**读取 marker / 事件的唯一入口是 `lib/adapter/normalize.js`**（0.4.57 起）：它同时认识旧
+`data.message.id` 与现行顶层 `data.id`，用 `eventAt(events, seq)` 处理窗口化日志（宿主按
+`log[seq - baseSeq]` 索引，`events[seq]` 只对 baseSeq=0 成立），并导出现在宿主自己的
+`foldSurface`。新增读取方一律走它，不要自己 `event.data.message?.id` 或 `events[seq]`。
+
 ## 1. 构建链约束
 
 - `package.json` 里的 `build` / `check` 脚本引用 `scripts/*.mjs`，**该目录不在仓库里（私有工具链），跑不了也别试图修复**。
@@ -34,7 +39,7 @@ better-display 已于 2026-09-14 从 web profile 卸载（用户不要独立阅�
 
 ## 4. 部署闭环（注意 profile 钉了 commit）
 
-**当前版本**：v0.4.55。profile（`C:/Users/daha/.dsh/profiles/web/package.json`）里钉的是
+**当前版本**：v0.4.57。profile（`C:/Users/daha/.dsh/profiles/desktop/package.json`）里钉的是
 `"dsh-retrace": "github:daha1216/dsh-retrace#<commit>"`（hash 随部署更新，以 profile 实况为准）。
 
 **改完视觉样式后的最小验证闭环**（每步都别跳，缺一步就可能在旧代码上白验）：

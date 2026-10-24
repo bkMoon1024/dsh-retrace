@@ -1,7 +1,7 @@
 # 🧭 dsh-retrace
 
 > A session time machine for DeepSeek Harness — a personal compatibility-fix fork of
-> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.56**.
+> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.57**.
 
 Recall a whole turn, edit-and-resend a past prompt, or regenerate a reply — while the
 conversation state and the workspace files it touched are versioned together. Every rollback
@@ -48,8 +48,22 @@ hot-load bundles. If `dsh` is not on your PATH, prefix the command with
 
 ---
 
-## 🔄 Recent changes (0.4.50 → 0.4.56)
+## 🔄 Recent changes (0.4.50 → 0.4.57)
 
+- **0.4.57** — host contract unification. Every reader now goes through one
+  normalisation layer (`lib/adapter/normalize.js`) that understands both marker
+  generations (legacy `data.message.id`, current top-level `data.id`), derives
+  event rows through a `baseSeq`-aware lookup instead of `events[seq]`, and treats
+  the host's own surface fold as the only authority. Consequences: recall, fold
+  and restore markers written by this build are recognised by the plugin's own
+  readers (previously every fold written since the marker format changed was
+  invisible to `unfold`, and restore refused its own markers); sessions whose log
+  is a window (forked or compacted) no longer read the wrong event row when
+  computing a span; `waterLevel` and the round/range boundary helpers share the
+  same envelope handling. At startup the plugin probes the running host for
+  `Session.prototype.snapshotEvents`; if the contract is not recognised it runs
+  read-only (edits answer `host-contract-unsupported`) and reports that through
+  `GET /api/plugins/retrace/capabilities`, instead of guessing compatibility.
 - **0.4.56** — safety stop-loss: artifact rollback and automatic GC now ship disabled.
   The audit could not prove boundary-time capture, snapshot write-back or the automatic
   sweep safe against the current host contracts, so they are host-enforced capability
