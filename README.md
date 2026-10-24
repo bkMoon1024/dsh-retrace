@@ -1,7 +1,7 @@
 # 🧭 dsh-retrace
 
 > A session time machine for DeepSeek Harness — a personal compatibility-fix fork of
-> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.59**.
+> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.60**.
 
 Recall a whole turn, edit-and-resend a past prompt, or regenerate a reply — while the
 conversation state and the workspace files it touched are versioned together. Every rollback
@@ -48,8 +48,19 @@ hot-load bundles. If `dsh` is not on your PATH, prefix the command with
 
 ---
 
-## 🔄 Recent changes (0.4.50 → 0.4.59)
+## 🔄 Recent changes (0.4.50 → 0.4.60)
 
+- **0.4.60** — rollback is a two-step operation with a server-issued ticket.
+  Preview returns a single-use `planId` bound to the session, version, scope and
+  current revision; execute refuses to run without it (`plan-required`), refuses
+  a second use (`plan-used`) and refuses a preview that a newer boundary made
+  stale (`plan-stale`). A context rollback that would have to bring back messages
+  the session no longer shows is refused (`restore-unsupported`) instead of
+  writing a marker that cannot reproduce the target surface. Every executed
+  rollback appends one line to `~/.dsh/dsh-retrace/operations.jsonl` (ids, scope
+  and per-file status only — never message text or file contents), and artifact
+  restores are serialized per workspace so two sessions cannot write the same
+  files at once.
 - **0.4.59** — snapshot writes are transactional. References to one object are
   serialized per content address (two files with identical content used to lose
   one of the two references), a reference write that fails drops the object it
