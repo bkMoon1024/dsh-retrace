@@ -40,8 +40,8 @@ git 事实键是 `<sessionId>|<versionId>`，构造函数 `refFor()` / `versionK
 ## 1. 构建链约束
 
 - **0.4.64 起 `client.bundle.js` 可以生成**：`node scripts/build-client.mjs` 用确定性变换（react 用 require、badge.js 内联、去 `export ` 前缀、末尾 `module.exports`）从 `client.js` 产出 bundle，`--check` 模式只比对不写盘。生成物行为等价性由隔离测试保证（同一套用例对 `client.js` 与 `client.bundle.js` 各跑一遍，39 条）。
-- `node scripts/check-syntax.mjs` 一次跑完：全部 `lib/**/*.js` 的 `node --check`（跳过 `dynamic-client.js` / `dynamic-host.js` 这两个注入式片段）、package.json 与 README/AGENTS 的版本号一致性、bundle 是否与源同步。**改完客户端先跑它**。
-- `dynamic-client.js` / `dynamic-host.js` 仍是旧构建链产物（0.4.43 停更），不在 `exports["./client"]` 路径上；要重建需要私有工具链，手改 99KB 生成物风险大于收益，保持现状。
+- `node scripts/check-syntax.mjs` 一次跑完：全部 `lib/**/*.js` 的 `node --check`（无例外）、package.json 与 README/AGENTS 的版本号一致性、bundle 是否与源同步。**改完客户端先跑它**。
+- 0.4.66 删除了 `lib/dynamic-client.js` / `lib/dynamic-host.js` 及其 `exports` 条目：它们停在 0.4.43，缺此后所有安全修复，属于已知不安全的旁路。要恢复动态入口，必须先写生成器 + 双半区等价测试。
 - 无 node_modules，`vitest` 不可用；**不要 pnpm install**（会生成 node_modules，勿提交）。
 - 布局 E2E：`node scripts/e2e-layout.cjs`（仓库自带；playwright 与 dsh web 环境路径见脚本头注释，可用 `DSH_WEB_URL` / `DSH_WEB_LOG` / `DSH_WEBKIT_PATH` 覆盖）。
 
@@ -64,7 +64,7 @@ better-display 已于 2026-09-14 从 web profile 卸载（用户不要独立阅�
 
 ## 4. 部署闭环（注意 profile 钉了 commit）
 
-**当前版本**：v0.4.65。profile（`C:/Users/daha/.dsh/profiles/desktop/package.json`）里钉的是
+**当前版本**：v0.4.66。profile（`C:/Users/daha/.dsh/profiles/desktop/package.json`）里钉的是
 `"dsh-retrace": "github:daha1216/dsh-retrace#<commit>"`（hash 随部署更新，以 profile 实况为准）。
 
 **改完视觉样式后的最小验证闭环**（每步都别跳，缺一步就可能在旧代码上白验）：

@@ -1,7 +1,7 @@
 # 🧭 dsh-retrace
 
 > A session time machine for DeepSeek Harness — a personal compatibility-fix fork of
-> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.65**.
+> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.66**.
 
 Recall a whole turn, edit-and-resend a past prompt, or regenerate a reply — while the
 conversation state and the workspace files it touched are versioned together. Every rollback
@@ -48,8 +48,12 @@ hot-load bundles. If `dsh` is not on your PATH, prefix the command with
 
 ---
 
-## 🔄 Recent changes (0.4.50 → 0.4.65)
+## 🔄 Recent changes (0.4.50 → 0.4.66)
 
+- **0.4.66** — the dynamic-plugin entry points are gone. `lib/dynamic-client.js` and
+  `lib/dynamic-host.js` had been frozen at 0.4.43, which meant anyone using that path got
+  single-click recall, no request gate and no rollback ticket. The files and their `exports`
+  entries were removed; install the bundle form instead.
 - **0.4.65** — the artifact store can be inspected and cleaned offline.
   `retrace store inventory` classifies every object as live, legacy (refs written
   before 0.4.58 that carry no session id), dangling or orphan; `retrace store gc`
@@ -223,10 +227,9 @@ scripts/e2e-layout.cjs # layout E2E (needs an external playwright install)
   **not** part of this fork — don't run `pnpm build` / `pnpm test`.
 - Client changes must be made in **both** `lib/client.js` and `lib/client.bundle.js`, and both
   must pass `node --check`.
-- `lib/dynamic-*.js` are generated artifacts and currently lag the published bundle (0.4.43);
-  install the bundle form.
-- Syntax check: `node --check lib/*.js` (`dynamic-client.js` / `dynamic-host.js` report
-  `Illegal return statement` by design — they are injected function bodies).
+- The dynamic-plugin entry points (`lib/dynamic-*.js` and their `exports`) were removed in
+  0.4.66: they had been frozen at 0.4.43 and silently skipped every safety fix since.
+- Syntax check: `node scripts/check-syntax.mjs` (every `lib/**/*.js`, no exceptions).
 
 ---
 

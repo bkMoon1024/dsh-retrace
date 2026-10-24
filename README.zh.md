@@ -5,7 +5,7 @@
 **撤回 · 编辑重发 · 重新生成**，加上**写安全**的会话版本化 —— DeepSeek Harness 的
 **Agent 业务层（生产级保证）** 实现。
 
-[![Version](https://img.shields.io/badge/version-0.4.65-blue)](https://github.com/daha1216/dsh-retrace/commits/main)
+[![Version](https://img.shields.io/badge/version-0.4.66-blue)](https://github.com/daha1216/dsh-retrace/commits/main)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/daha1216/dsh-retrace/blob/main/LICENSE)
 [![DSH plugin](https://img.shields.io/badge/DSH-plugin-4A90D9)](https://github.com/topics/dsh-plugin)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](https://github.com/daha1216/dsh-retrace/pulls)
@@ -15,7 +15,7 @@
 </div>
 
 > 本仓库是 [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace) 的个人兼容修复
-> Fork（维护者 daha1216），当前版本 **0.4.65**。0.4.50–0.4.65 的数据安全、体验与深色模式修复见下方
+> Fork（维护者 daha1216），当前版本 **0.4.66**。0.4.50–0.4.66 的数据安全、体验与深色模式修复见下方
 > 「更新记录」；安装请从本 Fork 的 GitHub 直装（详见安装章节）。
 
 **撤回 / 编辑重发 / 重新生成** —— 每个会话都该有的三个操作。但回退不只是「撤掉一条
@@ -32,7 +32,7 @@
 > 需要带 `dsh` CLI 的 DeepSeek Harness；装完**重启 DSH** 生效（运行中的应用不会热加载）。
 
 ```sh
-# 推荐：从本 Fork 的 GitHub 直装（含 0.4.50–0.4.65 修复）
+# 推荐：从本 Fork 的 GitHub 直装（含 0.4.50–0.4.66 修复）
 dsh plugin --profile desktop add github:daha1216/dsh-retrace   # DSH 桌面版
 # 或 Web 部署：dsh plugin --profile web add github:daha1216/dsh-retrace
 # 或从 ZIP 解压后：dsh plugin --profile desktop add ~/plugins/dsh-retrace
@@ -93,7 +93,7 @@ dsh plugin --profile <name> add github:daha1216/dsh-retrace
 ```
 
 > 注意：`add dsh-retrace`（不带 GitHub 前缀）会从 npm 装到**上游版本**，不包含本 Fork
-> 的 0.4.50–0.4.65 修复。请始终用上面的 GitHub 形式安装。
+> 的 0.4.50–0.4.66 修复。请始终用上面的 GitHub 形式安装。
 
 > ⚠️ **安装后需要重启。** 安装会写入新文件并重新生成 profile 组合，但运行中的应用
 > **不会**热加载 bundle —— 请**退出并重新打开 DSH Desktop**（独立 Web 部署则重启
@@ -154,20 +154,15 @@ dsh plugin --profile <name> add github:daha1216/dsh-retrace
 Client 半区会依据包内 `dsh.client` 元数据被自动打包进 Web 客户端（组合变化时会自动
 重建客户端模块）；Host 半区为浏览器 UI 注册同源 HTTP 路由 `/api/plugins/retrace/*`。
 
-### 4. 动态插件（当前会话，免安装、免重建）
+### 4. 动态插件入口（已在 0.4.66 移除）
 
-> ⚠️ 动态入口（`lib/dynamic-host.js` / `lib/dynamic-client.js`）是生成产物，当前停留在
-> **0.4.43**，**不包含** 0.4.44–0.4.54 的修复。建议用方式 1/2 的 bundle 安装。
+0.4.66 之前包内附带 `lib/dynamic-host.js` / `lib/dynamic-client.js` 两个自包含入口，供「插件编辑
+界面里新建动态插件」使用。它们停在 0.4.43，不包含此后所有安全修复（单次点击撤回、无请求闸、
+无票据校验），继续分发等于提供一个已知不安全的旁路。
 
-包内提供了两个自包含的动态入口：
-
-1. 打开插件编辑界面，用 `lib/dynamic-host.js`（Host 半区）和
-   `lib/dynamic-client.js`（Client 半区）新建插件；
-2. 批准并运行 Client 半区；
-3. 完成 —— 悬停任意助手回复或用户消息，即可使用 ↩ / ✎ / ↻。
-
-动态 Host 通过 `harness.handle` 注册同一组操作
-（`retrace.recall` / `retrace.editAndResend` / `retrace.regenerate` 等）。
+这两个文件与对应的 `exports` 条目已在 0.4.66 删除。请用上面的 bundle 形式安装；如果你确实需要
+动态入口，应当先补一个把 `lib/index.js` + `lib/client.js` 变换成无 import 单文件的生成器，并用
+同一套隔离测试验证两半行为一致，而不是手工维护生成物。
 
 ---
 
@@ -184,8 +179,11 @@ Client 半区会依据包内 `dsh.client` 元数据被自动打包进 Web 客户
 
 ---
 
-## 🔄 更新记录（0.4.50 → 0.4.65）
+## 🔄 更新记录（0.4.50 → 0.4.66）
 
+- **0.4.66** —— 移除动态插件入口。`lib/dynamic-client.js` 与 `lib/dynamic-host.js` 停在 0.4.43，
+  走那条路的用户会得到单次点击撤回、没有请求闸、没有回退票据的旧行为。文件与 `exports` 条目
+  一并删除，请用 bundle 形式安装。
 - **0.4.65** —— 产物库可以离线盘点和清理。`retrace store inventory` 把每个对象
   分成在用、legacy（0.4.58 前写入、没有会话前缀的引用）、悬空、孤儿四类；
   `retrace store gc` 默认只预演，要 `--apply --yes` 才删除，且只删「没有任何引用」
@@ -369,9 +367,7 @@ cordis.patch.yml       # dsh.bundle profile patch 层
   **不在**本仓库中——请勿执行 `pnpm build` / `pnpm test`。
 - 修改客户端必须同时改 `lib/client.js` 与 `lib/client.bundle.js`，两者都要通过
   `node --check`。
-- `lib/dynamic-*.js` 是生成产物，当前落后于发布版（0.4.43）；安装请用 bundle 形式。
-- 语法检查：`node --check lib/*.js`（`dynamic-client.js` / `dynamic-host.js` 报
-  `Illegal return statement` 属预期，它们是注入式函数体片段）。
+- 语法检查：`node scripts/check-syntax.mjs`（全部 `lib/**/*.js` 逐个 `node --check`，不再有例外）。
 
 欢迎提交 PR 与 issue —— 见[问题追踪](https://github.com/daha1216/dsh-retrace/issues)。
 

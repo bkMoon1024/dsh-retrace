@@ -14,9 +14,6 @@ import { fileURLToPath } from 'node:url'
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const failures = []
 
-/** dynamic-*.js 是注入式函数体片段（不是完整模块），node --check 必然报错，跳过。 */
-const FRAGMENT = /^dynamic-(client|host)\.js$/
-
 function walk(dir) {
   const out = []
   for (const name of readdirSync(dir)) {
@@ -29,7 +26,6 @@ function walk(dir) {
 
 for (const file of walk(join(ROOT, 'lib'))) {
   const rel = relative(ROOT, file).split('\\').join('/')
-  if (FRAGMENT.test(rel.split('/').pop())) continue
   try {
     execFileSync(process.execPath, ['--check', file], { stdio: 'pipe' })
   } catch (error) {
