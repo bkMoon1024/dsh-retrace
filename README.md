@@ -1,7 +1,7 @@
 # 🧭 dsh-retrace
 
 > A session time machine for DeepSeek Harness — a personal compatibility-fix fork of
-> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.71**.
+> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.72**.
 
 Recall a whole turn, edit-and-resend a past prompt, or regenerate a reply — while the
 conversation state and the workspace files it touched are versioned together. Every rollback
@@ -48,8 +48,13 @@ hot-load bundles. If `dsh` is not on your PATH, prefix the command with
 
 ---
 
-## 🔄 Recent changes (0.4.50 → 0.4.71)
+## 🔄 Recent changes (0.4.50 → 0.4.72)
 
+- **0.4.72** — a rollback that overwrites files now leaves an undo behind: the bytes are
+  captured before any write, the timeline shows a toast with an Undo button, and the ticket
+  works once within 30 minutes. Recall chips also say what recall really does (hide this
+  message and everything after it), and timeline rows lead with relative time while the
+  version id and exact timestamp live in the tooltip.
 - **0.4.71** — every reference keeps its own capture time, so reusing bytes that were
   stored long ago (deduplication) no longer makes a fresh boundary look unprovable and
   get refused at restore time. Rows written before 0.4.71 have no such field and fall
