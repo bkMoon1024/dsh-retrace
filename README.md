@@ -1,7 +1,7 @@
 # 🧭 dsh-retrace
 
 > A session time machine for DeepSeek Harness — a personal compatibility-fix fork of
-> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.68**.
+> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.69**.
 
 Recall a whole turn, edit-and-resend a past prompt, or regenerate a reply — while the
 conversation state and the workspace files it touched are versioned together. Every rollback
@@ -48,8 +48,15 @@ hot-load bundles. If `dsh` is not on your PATH, prefix the command with
 
 ---
 
-## 🔄 Recent changes (0.4.50 → 0.4.68)
+## 🔄 Recent changes (0.4.50 → 0.4.69)
 
+- **0.4.69** — boundary capture only records boundaries created after the plugin
+  started. The projection replays a session's whole history when it loads, and each
+  replayed boundary used to trigger a snapshot of the *current* workspace, storing
+  today's bytes as that boundary's content. Replayed history is now skipped, a
+  capture that lands late is marked racy, and every snapshot recorded before the
+  first 0.4.69 run is treated as racy at restore time (`capture-epoch.json`) instead
+  of being deleted.
 - **0.4.68** — `retrace store migrate` freezes the legacy era explicitly. Refs written
   before 0.4.58 carry no session id and their `versiongit` rows do not either, so there
   is no honest way to attribute them; the command records that fact in
