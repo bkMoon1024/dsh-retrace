@@ -1,7 +1,7 @@
 # 🧭 dsh-retrace
 
 > A session time machine for DeepSeek Harness — a personal compatibility-fix fork of
-> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.77**.
+> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.78**.
 
 Recall a whole turn, edit-and-resend a past prompt, or regenerate a reply — while the
 conversation state and the workspace files it touched are versioned together. Every rollback
@@ -48,8 +48,14 @@ hot-load bundles. If `dsh` is not on your PATH, prefix the command with
 
 ---
 
-## 🔄 Recent changes (0.4.50 → 0.4.77)
+## 🔄 Recent changes (0.4.50 → 0.4.78)
 
+- **0.4.78** — two contributor fixes landed, plus the paths the plugin derives from `DSH_HOME`:
+  `regenerate` now reads windowed logs through `eventAt` (a bare index picked the neighbouring row,
+  resending someone else's text), `capture-epoch.json` is written atomically and a truncated marker is
+  salvaged instead of advancing the epoch (which silently invalidated every existing snapshot), the
+  interrupt guard keeps one entry per turn (crash → recover → crash used to report nothing) and now
+  reads the host's `snapshotEvents()`, and the session-file lookup honours `DSH_HOME`.
 - **0.4.77** — the legacy badge prefix is now removed when a session is loaded, not only
   during the startup sweep, so sessions opened later are covered too.
 - **0.4.76** — sessions opened after startup also get their legacy badge prefix removed:
