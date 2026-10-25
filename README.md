@@ -1,7 +1,7 @@
 # 🧭 dsh-retrace
 
 > A session time machine for DeepSeek Harness — a personal compatibility-fix fork of
-> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.70**.
+> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.71**.
 
 Recall a whole turn, edit-and-resend a past prompt, or regenerate a reply — while the
 conversation state and the workspace files it touched are versioned together. Every rollback
@@ -48,8 +48,12 @@ hot-load bundles. If `dsh` is not on your PATH, prefix the command with
 
 ---
 
-## 🔄 Recent changes (0.4.50 → 0.4.70)
+## 🔄 Recent changes (0.4.50 → 0.4.71)
 
+- **0.4.71** — every reference keeps its own capture time, so reusing bytes that were
+  stored long ago (deduplication) no longer makes a fresh boundary look unprovable and
+  get refused at restore time. Rows written before 0.4.71 have no such field and fall
+  back to the old boundary-time column, which is why pre-epoch references stay racy.
 - **0.4.70** — the store now repairs itself at startup: rows that lost both their
   references and their object (ledger residue from the pre-0.4.50 GC, 608 of them on the
   machine this was found on) are dropped through the storage domain, so the in-memory
