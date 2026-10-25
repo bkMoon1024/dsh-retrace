@@ -9,6 +9,7 @@
   "scripts": {
     "build": "node scripts/build-client.mjs",
     "check": "node scripts/check-syntax.mjs",
+    "test": "node --test",
     "verify:layout": "node scripts/e2e-layout.cjs",
     "prepublishOnly": "node scripts/check-syntax.mjs && node scripts/build-client.mjs"
   },
