@@ -1,7 +1,7 @@
 # 🧭 dsh-retrace
 
 > A session time machine for DeepSeek Harness — a personal compatibility-fix fork of
-> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.74**.
+> [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace). Current version: **0.4.75**.
 
 Recall a whole turn, edit-and-resend a past prompt, or regenerate a reply — while the
 conversation state and the workspace files it touched are versioned together. Every rollback
@@ -48,8 +48,10 @@ hot-load bundles. If `dsh` is not on your PATH, prefix the command with
 
 ---
 
-## 🔄 Recent changes (0.4.50 → 0.4.74)
+## 🔄 Recent changes (0.4.50 → 0.4.75)
 
+- **0.4.75** — the title cleanup matches badges case-insensitively (`dd833FF000`, not just
+  lowercase hex), so existing prefixed titles are actually stripped.
 - **0.4.74** — the short code is display-only again: no operation rewrites a session title, and
 titles that older builds prefixed with `[badge]` are cleaned back to the text the user wrote.
 - **0.4.73** — the undo toast tells the truth about its own scope: when a rollback also
