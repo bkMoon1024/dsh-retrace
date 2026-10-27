@@ -5,7 +5,7 @@
 **撤回 · 编辑重发 · 重新生成**，加上**写安全**的会话版本化 —— DeepSeek Harness 的
 **Agent 业务层（生产级保证）** 实现。
 
-[![Version](https://img.shields.io/badge/version-0.4.78-blue)](https://github.com/daha1216/dsh-retrace/commits/main)
+[![Version](https://img.shields.io/badge/version-0.4.79-blue)](https://github.com/daha1216/dsh-retrace/commits/main)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/daha1216/dsh-retrace/blob/main/LICENSE)
 [![DSH plugin](https://img.shields.io/badge/DSH-plugin-4A90D9)](https://github.com/topics/dsh-plugin)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](https://github.com/daha1216/dsh-retrace/pulls)
@@ -15,7 +15,7 @@
 </div>
 
 > 本仓库是 [yamingmou/dsh-retrace](https://github.com/yamingmou/dsh-retrace) 的个人兼容修复
-> Fork（维护者 daha1216），当前版本 **0.4.78**。0.4.50–0.4.70 的数据安全、体验与深色模式修复见下方
+> Fork（维护者 daha1216），当前版本 **0.4.79**。0.4.50–0.4.70 的数据安全、体验与深色模式修复见下方
 > 「更新记录」；安装请从本 Fork 的 GitHub 直装（详见安装章节）。
 
 **撤回 / 编辑重发 / 重新生成** —— 每个会话都该有的三个操作。但回退不只是「撤掉一条
@@ -32,7 +32,7 @@
 > 需要带 `dsh` CLI 的 DeepSeek Harness；装完**重启 DSH** 生效（运行中的应用不会热加载）。
 
 ```sh
-# 推荐：从本 Fork 的 GitHub 直装（含 0.4.50–0.4.78 修复）
+# 推荐：从本 Fork 的 GitHub 直装（含 0.4.50–0.4.79 修复）
 dsh plugin --profile desktop add github:daha1216/dsh-retrace   # DSH 桌面版
 # 或 Web 部署：dsh plugin --profile web add github:daha1216/dsh-retrace
 # 或从 ZIP 解压后：dsh plugin --profile desktop add ~/plugins/dsh-retrace
@@ -93,7 +93,7 @@ dsh plugin --profile <name> add github:daha1216/dsh-retrace
 ```
 
 > 注意：`add dsh-retrace`（不带 GitHub 前缀）会从 npm 装到**上游版本**，不包含本 Fork
-> 的 0.4.50–0.4.78 修复。请始终用上面的 GitHub 形式安装。
+> 的 0.4.50–0.4.79 修复。请始终用上面的 GitHub 形式安装。
 
 > ⚠️ **安装后需要重启。** 安装会写入新文件并重新生成 profile 组合，但运行中的应用
 > **不会**热加载 bundle —— 请**退出并重新打开 DSH Desktop**（独立 Web 部署则重启
@@ -179,8 +179,9 @@ Client 半区会依据包内 `dsh.client` 元数据被自动打包进 Web 客户
 
 ---
 
-## 🔄 更新记录（0.4.50 → 0.4.78）
+## 🔄 更新记录（0.4.50 → 0.4.79）
 
+- **0.4.79** —— 对抗式审计加固：请求闸门现在同时校验 socket 对端（伪造 `Host` 头不再能打开仅限环回的只读路由），剥离调用方自带的 span，5xx 内部信息脱敏，会话 ID / 产物 sha / 模型推导路径全部校验并限长，快照读取加上限；undo 与 restore 重新校验工作区 realpath 与文件版本，git 回退对「窗口内新建 / 脏工作树捕获」的文件回退到内容快照；折叠 marker 补上缺失的「展开」控件，`git/init` 写入操作日志，损坏的 `capture-epoch.json` 改从文件 mtime 恢复而不是前移 epoch（前移会让所有已有快照失效）。
 - **0.4.78** —— 合并了两份外部贡献的修复，并补齐 `DSH_HOME` 的路径处理：`regenerate` 在窗口化日志下改用 `eventAt` 取行（原来按裸下标取到相邻行，会把别人的文本当 prompt 重发）；`capture-epoch.json` 改为原子写、截断的 marker 用正则抢救而不是把 epoch 前移（前移会让所有已有快照静默失效）；中断守卫改为按 turn 号记账（「崩溃→恢复→再崩溃」原来一条都不报），并改读宿主的 `snapshotEvents()`（原来读 `session.events`，在真实会话上恒为空）；会话文件查找改为跟随 `DSH_HOME`。
 - **0.4.77** —— 旧短码前缀改为「会话一加载就清理」，不再只依赖启动时的一次扫描，启动之后才打开的会话也能覆盖。
 - **0.4.76** —— 启动之后才打开的会话也会被清理旧短码前缀：插件的每次请求都会上报它触碰的会话，清理对每个会话只跑一次。

@@ -20,8 +20,9 @@ git 事实键是 `<sessionId>|<versionId>`，构造函数 `refFor()` / `versionK
 （`parseRef().legacy`）一律视为不可归属——GC 不释放、按会话查询不命中，不要给它们
 猜归属。
 
-**请求边界**（0.4.61 起）：插件路由不受宿主鉴权保护，因此自带三道闸——Host 必须是
-环回地址（隧道/局域网需 `DSH_RETRACE_ALLOW_REMOTE=1` 显式开启），写请求必须带
+**请求边界**（0.4.61 起；0.4.79 加严）：插件路由不受宿主鉴权保护，因此自带三道闸——套接字对端
+与 `Host` 头都必须是环回地址（只伪造 `Host` 不再放行；隧道/局域网需 `DSH_RETRACE_ALLOW_REMOTE=1`
+显式开启），写请求必须带
 `x-retrace-client: web`（错误码 `host-not-allowed` / `client-header-required`，均 403），
 `git/init` 需要 `confirm: true` 且沙箱策略解析失败时以 `sandbox-policy-unavailable`
 失败关闭。只读 GET 不要求凭据，改动前先确认它不暴露工作区之外的内容。
@@ -31,15 +32,17 @@ git 事实键是 `<sessionId>|<versionId>`，构造函数 `refFor()` / `versionK
 `plan-mismatch` / `plan-stale` / `restore-unsupported` 一律映射 HTTP 409。每次执行
 追加一行到 `<storeRoot>/operations.jsonl`，只含 ID、范围与逐文件状态。
 
-**快照写入的三条不变量**（0.4.59 起）：①同一 sha 的引用读改写走 `withSha()` 串行链，
-否则同内容并发快照会丢引用；②引用写入失败时若对象是新建的就删掉，不留孤儿；③sweep
+**快照写入的三条不变量**（0.4.59 起；0.4.79 调整第②条）：①同一 sha 的引用读改写走
+`withSha()` 串行链，否则同内容并发快照会丢引用；②引用写入失败时**不再同步删对象**——
+错误发生时可能已有别的并发快照先写入成功同一 sha 的引用，删掉会丢活数据；对象留给
+`sweepGc` 的宽限期（`GC_GRACE_MS`）按“无引用且够老”回收；③sweep
 先 `settleSnapshots()` 等在途快照，再算 keep。边界捕获若在读取期间被更新的边界动过同一
 路径，引用会进 `racy` 数组，回退侧必须用 `snapshotState()`（不是 `resolveSnapshot()`）
 判断并拒绝，理由码 `snapshot-racy`。
 
 ## 1. 构建链约束
 
-- **0.4.64 起 `client.bundle.js` 可以生成**：`node scripts/build-client.mjs` 用确定性变换（react 用 require、badge.js 内联、去 `export ` 前缀、末尾 `module.exports`）从 `client.js` 产出 bundle，`--check` 模式只比对不写盘。生成物行为等价性由隔离测试保证（同一套用例对 `client.js` 与 `client.bundle.js` 各跑一遍，39 条）。
+- **0.4.64 起 `client.bundle.js` 可以生成**：`node scripts/build-client.mjs` 用确定性变换（react 用 require、badge.js 内联、去 `export ` 前缀、末尾 `module.exports`）从 `client.js` 产出 bundle，`--check` 模式只比对不写盘。生成物与源的行为等价性靠「同一变换 + `--check` + 双文件符号镜像」保证：改完必须两份都 `node --check`，再跑 `node scripts/check-syntax.mjs`（它会比对 bundle 与源是否同步）。
 - `node scripts/check-syntax.mjs` 一次跑完：全部 `lib/**/*.js` 的 `node --check`（无例外）、package.json 与 README/AGENTS 的版本号一致性、bundle 是否与源同步。**改完客户端先跑它**。
 - 0.4.66 删除了 `lib/dynamic-client.js` / `lib/dynamic-host.js` 及其 `exports` 条目：它们停在 0.4.43，缺此后所有安全修复，属于已知不安全的旁路。要恢复动态入口，必须先写生成器 + 双半区等价测试。
 - 无 node_modules，`vitest` 不可用；**不要 pnpm install**（会生成 node_modules，勿提交）。
@@ -64,7 +67,7 @@ better-display 已于 2026-09-14 从 web profile 卸载（用户不要独立阅�
 
 ## 4. 部署闭环（注意 profile 钉了 commit）
 
-**当前版本**：v0.4.78。profile（`C:/Users/daha/.dsh/profiles/desktop/package.json`）里钉的是
+**当前版本**：v0.4.79。profile（`C:/Users/daha/.dsh/profiles/desktop/package.json`）里钉的是
 `"dsh-retrace": "github:daha1216/dsh-retrace#<commit>"`（hash 随部署更新，以 profile 实况为准）。
 
 **改完视觉样式后的最小验证闭环**（每步都别跳，缺一步就可能在旧代码上白验）：
