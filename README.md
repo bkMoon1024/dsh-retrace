@@ -41,7 +41,8 @@ hot-load bundles. If `dsh` is not on your PATH, prefix the command with
 - **🕘 Version timeline** — every rollback becomes a version (kind / time / message count /
   file changes), pushed live via `session/projection`.
 - **↩️ Artifact rollback** — conversation only, files only, or both, with a dry-run preview;
-  git first, content-addressed snapshots as fallback; a rollback is itself a new version.
+  git when the boundary recorded the exact committed bytes, content-addressed snapshots
+  otherwise; a rollback is itself a new version.
 - **🧭 Fork map & lineage** — visualize branch points and parent-session lineage.
 - **🗂️ Session archaeology CLI** — read-only index / query / extract / file-history over
   persisted session logs.

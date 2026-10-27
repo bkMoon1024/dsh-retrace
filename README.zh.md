@@ -69,7 +69,7 @@ dsh plugin --profile desktop add github:daha1216/dsh-retrace   # DSH 桌面版
 | | 能力 | 说明 |
 |---|---|---|
 | 🕘 | **时间线** | 「版本」Tab（与官方「对话/轨迹」平级）：每个版本的类型/时间/消息数/文件变更徽标，经 `session/projection` 推送帧实时更新（零轮询），大列表窗口化 |
-| ↩️ | **产物回退** | 仅对话 / 仅产物 / 两者，先干跑预览再执行；git 优先 + 内容寻址快照兜底；回退本身是新版本（`restore`），可以再回退 |
+| ↩️ | **产物回退** | 仅对话 / 仅产物 / 两者，先干跑预览再执行；边界已提交时用 git，否则用内容寻址快照；回退本身是新版本（`restore`），可以再回退 |
 | 🧭 | **跳转对话** | 从时间线一键跳转到对应位置（自动翻页加载更早历史 + 锚点高亮） |
 | 🧹 | **存储有界** | 快照只保留最近 N 个版本（默认 50，可在设置里 1–1000 调整）；后台扫掠串行回收被截断版本，10 分钟内新写入的对象不参与回收，进程重启也不会误删其它会话的快照 |
 
@@ -266,7 +266,7 @@ Client 半区会依据包内 `dsh.client` 元数据被自动打包进 Web 客户
   拒绝自己的 marker）；日志是窗口（分叉或压缩后）的会话在计算区间时不再取错事件行；
   `waterLevel` 与轮次/区间边界辅助共用同一套信封处理。启动时会探测运行中的宿主是否
   提供 `Session.prototype.snapshotEvents`，契约不明则进入只读模式（写操作返回
-  `host-contract-unsupported`），并通过 `GET /api/plugins/retrace/capabilities` 如实
+  `capability-disabled`，HTTP 503），并通过 `GET /api/plugins/retrace/capabilities` 如实
   上报，而不是猜测兼容。
 - **0.4.56** —— 安全止损：产物回退与自动 GC 默认关闭。审计确认边界期快照、快照回写与
   自动清理在当前宿主契约下无法证明安全，因此本版把它们做成宿主侧能力门控
@@ -365,10 +365,10 @@ Client 半区会依据包内 `dsh.client` 元数据被自动打包进 Web 客户
 
 ## 🗺️ 路线图
 
-**当前已具备（0.4.54）：**
+**当前已具备（0.4.79）：**
 
 - 撤回 / 编辑重发 / 重新生成——每次回退都过**三层写前校验**与安全编辑路径（自动停 agent、临时 step 包裹 marker），**不会损坏日志、不会破坏 /compact**。
-- 单会话**版本时间线** + **产物回退**（git 优先 + 快照兜底、干跑预览、跳转对话、dirty 工作区拒绝覆盖）。
+- 单会话**版本时间线** + **产物回退**（git/快照按边界事实择一、干跑预览、跳转对话、dirty 工作区拒绝覆盖）。
 - 对话视图内的**分叉图** + **会话谱系**。
 - **看门狗**（默认关闭，`DSH_RETRACE_WATCHDOG=1` 开启）——并发写入第一时间快照日志。
 - 配套 **`dsh-log-contract`**：30+ 条离线契约规则 + 原地修复（`fix --neutralize` / `--clip-crossstep`），能处理会让 /compact 永久失败的会话。
@@ -396,8 +396,9 @@ scripts/e2e-layout.cjs # 布局 E2E（需外部安装 playwright）
 cordis.patch.yml       # dsh.bundle profile patch 层
 ```
 
-- `scripts/build-client.mjs`、`scripts/generate-dynamic.mjs`、`test/` 与 CI workflow
-  **不在**本仓库中——请勿执行 `pnpm build` / `pnpm test`。
+- `scripts/build-client.mjs`、`scripts/check-syntax.mjs` 与 `test/` **在**本仓库中，
+  直接用 `node` 运行（没有 `node_modules`，勿执行 `pnpm install` / `pnpm build`）；
+  CI workflow 不在本仓库。
 - 修改客户端必须同时改 `lib/client.js` 与 `lib/client.bundle.js`，两者都要通过
   `node --check`。
 - 语法检查：`node scripts/check-syntax.mjs`（全部 `lib/**/*.js` 逐个 `node --check`，不再有例外）。
